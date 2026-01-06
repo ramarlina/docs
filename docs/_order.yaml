@@ -1,0 +1,16 @@
+- index
+- cli:
+  - installation
+  - configuration
+  - commands
+  - workflows
+- platform:
+  - overview
+  - board
+  - workflow-canvas
+  - integration
+  - privacy
+- guide:
+  - getting-started
+  - configuration
+  - privacy

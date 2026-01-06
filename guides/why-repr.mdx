@@ -1,0 +1,318 @@
+---
+title: Why repr?
+description: "How repr compares to alternatives and saves you time"
+icon: "lightbulb"
+---
+
+You're a developer. You ship code every day. But when someone asks "what have you been working on?"—for an interview, a performance review, or even your weekly 1-on-1—you draw a blank.
+
+Sound familiar? You're not alone. Most developers struggle to articulate their work because they're too busy *doing* it to document it.
+
+## The Problem
+
+### You Forget 80% of Your Work
+
+Research shows developers forget the specifics of their work within weeks. By the time performance reviews roll around, you're left with vague memories like "I worked on the authentication system" instead of concrete achievements like "Reduced auth failures by 60% through distributed locking."
+
+### Git History is Cryptic
+
+```
+abc1234 fix bug
+def5678 update stuff
+ghi9012 wip
+```
+
+This is technically accurate. It's also useless for anyone trying to understand what you actually accomplished.
+
+### Brag Documents Require Discipline
+
+Some developers maintain "brag docs"—manual logs of their achievements. But:
+- You forget to update them
+- They require discipline you don't have time for
+- They're retroactively painful to fill in
+- There's no structure or templates
+
+## The repr Solution
+
+repr solves this by treating your **git history as your career diary**. It's already there. It's already complete. It just needs translation.
+
+### How It Works
+
+1. **Point repr at your code** — Scan your repos once
+2. **Install hooks (optional)** — Automatically capture commits as you work
+3. **Generate stories** — LLM reads commits and creates professional narratives
+4. **Review and curate** — Polish your best work, feature it on your profile
+5. **(Optional) Publish** — Share publicly or keep private
+
+Everything happens locally by default. Your code never leaves your machine unless you explicitly choose to publish.
+
+## vs. Alternatives
+
+### vs. Manual Brag Documents
+
+| Manual Brag Docs | repr |
+|------------------|------|
+| ❌ Requires daily discipline | ✅ Automatic (via git hooks) |
+| ❌ Easy to forget to update | ✅ Retroactive—works on existing history |
+| ❌ No structure | ✅ Professional templates (resume, interview, changelog) |
+| ❌ Time-consuming to maintain | ✅ Set-and-forget after initial setup |
+| ❌ Hard to quantify impact | ✅ LLM extracts metrics from commits |
+
+**Verdict:** repr is like an automatic brag doc that writes itself.
+
+### vs. GitHub Commit History
+
+| GitHub History | repr |
+|----------------|------|
+| ❌ Cryptic commit messages | ✅ Professional narratives with context |
+| ❌ No grouping or themes | ✅ Groups related commits into stories |
+| ❌ Not interview-ready | ✅ STAR-format stories for behavioral questions |
+| ❌ Technical jargon | ✅ Multiple templates for different audiences |
+| ❌ No privacy control | ✅ Local-first, you control what gets shared |
+
+**Verdict:** repr transforms raw commits into stories humans want to read.
+
+### vs. LinkedIn "Update Resume" Panic
+
+| End-of-Year Scramble | repr |
+|---------------------|------|
+| ❌ Try to remember 12 months of work | ✅ Run `repr generate --since "1 year ago"` |
+| ❌ Estimate impact ("probably improved speed?") | ✅ LLM extracts actual metrics from code |
+| ❌ Miss your best stories | ✅ Feature your top work, export instantly |
+| ❌ 3-4 hours of archaeology | ✅ 30 minutes of review and polish |
+
+**Verdict:** repr turns resume updates from archaeology into instant exports.
+
+### vs. ChatGPT + Copy-Pasting Commits
+
+| Manual ChatGPT | repr |
+|----------------|------|
+| ❌ Copy-paste 50 commits manually | ✅ Automatic batch processing |
+| ❌ No templates or structure | ✅ Built-in templates (resume, interview, etc.) |
+| ❌ No privacy (OpenAI sees your code) | ✅ Local LLMs or your own API keys |
+| ❌ No storage or versioning | ✅ Stories saved locally as Markdown |
+| ❌ Repeat process for each repo | ✅ Track multiple repos, generate in bulk |
+
+**Verdict:** repr is purpose-built for this exact use case.
+
+## ROI: Time Savings
+
+repr saves you hours every quarter. Here's the math:
+
+### Interview Prep
+
+**Without repr:**
+- Dig through git history: 1 hour
+- Read old PRs and commits: 1.5 hours
+- Write STAR stories manually: 1.5 hours
+- **Total: 4 hours**
+
+**With repr:**
+```bash
+repr generate --template interview --local
+repr stories  # Review and pick top 5
+repr profile export --format md > interview-prep.md
+```
+- Generate stories: 5 minutes
+- Review and polish: 25 minutes
+- **Total: 30 minutes**
+
+**Savings: 3.5 hours (88% faster)**
+
+---
+
+### Performance Review (Quarterly)
+
+**Without repr:**
+- Try to remember 3 months of work: 2 hours
+- Search Jira/Slack for context: 1 hour
+- Write impact statements: 2 hours
+- **Total: 5 hours**
+
+**With repr:**
+```bash
+repr generate --since "3 months ago" --template resume
+repr profile export --format md > Q4-review.md
+```
+- Generate stories: 3 minutes
+- Review and edit: 20 minutes
+- **Total: 23 minutes**
+
+**Savings: 4.6 hours (92% faster)**
+
+---
+
+### Weekly 1-on-1s
+
+**Without repr:**
+- Try to remember what you did this week: 10 minutes
+- Vague answers like "worked on auth stuff": Unprepared ❌
+
+**With repr:**
+```bash
+repr week
+```
+- Generate summary: 30 seconds
+- Show up with specifics: Prepared ✅
+
+**Savings: 10 minutes per week × 50 weeks = 8.3 hours/year**
+
+---
+
+### Sprint Demos
+
+**Without repr (team of 5):**
+- Ask everyone what they shipped: 15 minutes
+- Compile into slides: 15 minutes
+- **Total: 30 minutes** (but often more chaos)
+
+**With repr:**
+```bash
+repr generate --template changelog --since "2 weeks ago"
+repr profile export --format md > sprint-14.md
+```
+- Generate summary: 2 minutes
+- Copy to slides: 3 minutes
+- **Total: 5 minutes**
+
+**Savings: 25 minutes × 26 sprints/year = 10.8 hours/year**
+
+---
+
+### Annual Total Savings
+
+Assuming you:
+- Prep for 2 interviews per year: **7 hours saved**
+- Do 4 quarterly reviews: **18.4 hours saved**
+- Have 50 weekly 1-on-1s: **8.3 hours saved**
+- Do 26 sprint demos (if you're a lead): **10.8 hours saved**
+
+**Total: 44.5 hours saved per year**
+
+That's more than a **full work week** you get back. Use it to ship more code, learn new skills, or just go home on time.
+
+## When repr Really Shines
+
+### 1. Interview Season
+
+You've got a final round at a top company. They're going to ask behavioral questions like:
+- "Tell me about a time you solved a complex technical problem"
+- "Describe a situation where you had to make trade-offs"
+- "How do you handle tight deadlines?"
+
+**Without repr:** Panic, try to remember something good, wing it.
+
+**With repr:**
+```bash
+repr generate --template interview --local
+repr stories  # 10+ STAR-format stories ready to go
+```
+
+You show up with **specific examples, quantified results, and confident delivery**.
+
+### 2. Performance Review Time
+
+Your manager asks for a self-review covering the last 6 months. You have 3 days to write it.
+
+**Without repr:** Frantically search git logs, Jira, Slack. Miss half your best work. Submit something mediocre at 11:59pm.
+
+**With repr:**
+```bash
+repr generate --since "6 months ago" --template resume
+repr profile export --format md
+```
+
+You have a **professional, quantified summary** in 30 minutes. Spend the rest of the time polishing instead of panicking.
+
+### 3. Switching Jobs
+
+You need to update your resume. You haven't touched it in 2 years. You have no idea what to write.
+
+**Without repr:** Stare at LinkedIn, try to remember projects, write vague bullets like "worked on backend systems."
+
+**With repr:**
+```bash
+repr generate --template resume --since "2 years ago"
+repr story feature <top-5-ids>
+repr profile export --format md > resume-bullets.md
+```
+
+You have **5-10 polished resume bullets with quantified impact** ready to copy-paste.
+
+### 4. Leading a Team
+
+You're an engineering manager with 6 direct reports. It's 1-on-1 week. You need to come prepared with specific examples of each person's work.
+
+**Without repr:** Vague feedback like "you've been doing great on the API" or "keep up the good work."
+
+**With repr:**
+```bash
+repr repos add ~/code/team-project
+repr generate --local
+# Filter by author in your script or manually review stories
+```
+
+You show up with **specific examples of each person's contributions**. Your 1-on-1s are productive instead of generic.
+
+## Privacy-Sensitive Industries
+
+If you work in defense, healthcare, finance, or any compliance-heavy industry, repr is designed for you:
+
+### Air-Gapped Environments
+
+```bash
+# Install offline (transfer binary via USB)
+# Run local LLM (Ollama)
+repr privacy lock-local --permanent
+repr generate --local
+```
+
+- ✅ Zero network calls
+- ✅ Code never leaves your machine
+- ✅ Passes security audits
+
+### BYOK (Bring Your Own Key)
+
+```bash
+repr llm add openai
+repr generate
+```
+
+- ✅ Your API key, your costs
+- ✅ Calls go directly to OpenAI, not repr.dev
+- ✅ Keys stored in OS keychain, not config files
+
+### Privacy Audit
+
+```bash
+repr privacy audit --days 90
+```
+
+See exactly what data (if any) left your machine. Perfect for compliance reviews.
+
+## Who Uses repr?
+
+- **Individual Contributors** — Interview prep, performance reviews, career documentation
+- **Engineering Managers** — Team summaries, 1-on-1 prep, performance reviews
+- **Tech Leads** — Sprint demos, release notes, stakeholder updates
+- **Defense/Healthcare/Finance** — Air-gapped story generation for sensitive work
+- **Job Seekers** — Resume building, interview prep, portfolio creation
+
+## The Bottom Line
+
+You already did the work. You already committed the code. repr just helps you **remember and articulate what you built**.
+
+- **Time saved:** 40+ hours per year
+- **ROI:** Positive after the first use
+- **Privacy:** Local-first, you control everything
+- **Cost:** Free (if using local LLM)
+
+**Ready to unlock your git history?**
+
+```bash
+brew install repr
+repr init ~/code
+repr generate --local
+```
+
+[Get Started →](/quickstart) | [See All Features →](/guides/first-time-setup)

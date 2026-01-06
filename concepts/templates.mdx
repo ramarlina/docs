@@ -4,35 +4,330 @@ description: "Control the voice and format of your stories"
 icon: "copy"
 ---
 
-Templates determine how the LLM writes your story. Repr comes with several built-in templates designed for different audiences.
+Templates determine how the LLM writes your story. Think of them as different "voices" for the same work—you pick the voice that fits your audience.
+
+The same commits can become a resume bullet point, a changelog entry, a blog post, or an interview story. Templates control that transformation.
 
 ## Built-in Templates
 
 ### `resume` (Default)
-Focuses on **impact** and **action verbs**. Great for portfolios and performance reviews.
-- **Style**: Professional, concise, results-oriented.
-- **Example**: "Optimized database query performance by 40%..."
+**Best for:** Portfolios, performance reviews, weekly updates
+
+**Focus:** Impact and action verbs. Quantified results.
+
+**Style:** Professional, concise, results-oriented. Written for hiring managers and leadership.
+
+**Example output:**
+
+```markdown
+## Implemented Redis Caching Layer for API Performance
+
+Built a distributed caching system using Redis to reduce database load 
+and improve API response times. Implemented cache invalidation strategy 
+with TTL-based expiration and event-driven updates.
+
+Added monitoring and alerting for cache hit rates and memory usage. 
+Designed fallback logic to gracefully handle cache failures without 
+impacting user experience.
+
+**Impact:** Reduced average API response time from 450ms to 85ms (81% 
+improvement). Decreased database load by 60%, enabling support for 5x 
+more concurrent users.
+
+**Technologies:** Python, Redis, FastAPI, Prometheus
+```
+
+**Key features:**
+- ✅ Starts with strong action verbs
+- ✅ Quantifies impact with metrics
+- ✅ Emphasizes business value
+- ✅ Technologies listed explicitly
+
+---
 
 ### `changelog`
-Focuses on **technical details**. Good for release notes.
-- **Style**: Bullet points, grouped by Added/Changed/Fixed.
-- **Example**: "Fixed race condition in user session handling."
+**Best for:** Release notes, sprint summaries, team updates
+
+**Focus:** Technical details categorized by change type.
+
+**Style:** Bullet points, grouped by Added/Changed/Fixed. Written for developers and PMs.
+
+**Example output:**
+
+```markdown
+## Sprint 14 Summary (Jan 1-15, 2026)
+
+### Added
+- Redis caching layer with distributed invalidation
+- Cache hit rate monitoring dashboard
+- Automatic fallback to database on cache miss
+- TTL-based cache expiration (configurable per endpoint)
+- Health check endpoint for cache connectivity
+
+### Fixed
+- Memory leak in WebSocket connections (issue #342)
+- Race condition in session creation during high load
+- Incorrect cache key generation for parameterized queries
+
+### Changed
+- Migrated from in-memory cache to Redis cluster
+- Updated API response format to include cache metadata
+- Increased default cache TTL from 5 minutes to 15 minutes
+
+**Stats:**
+- 23 commits
+- 15 files changed
+- +1,200 / -450 lines
+```
+
+**Key features:**
+- ✅ Categorized by change type
+- ✅ Clear, scannable bullets
+- ✅ Good for sprint demos
+- ✅ References issues/tickets
+
+---
 
 ### `narrative`
-Focuses on the **journey**. Good for blog posts or detailed engineering logs.
-- **Style**: Paragraphs, storytelling, problem-solving context.
-- **Example**: "We started by identifying a bottleneck in the rendering pipeline..."
+**Best for:** Blog posts, case studies, technical deep-dives
+
+**Focus:** The journey—problem, solution, learnings.
+
+**Style:** Paragraphs, storytelling, problem-solving context. Written for engineers and technical audiences.
+
+**Example output:**
+
+```markdown
+## How We Cut API Response Time by 81%
+
+Our API was slow. 450ms average response time doesn't sound terrible, 
+but when you're making 10+ API calls to render a single page, users 
+notice. We were getting complaints.
+
+The root cause was obvious once we looked: every request hit the 
+database, even for data that rarely changed. User profiles, settings, 
+feature flags—all fetched fresh every time. We were doing 1000 database 
+queries per second at peak load.
+
+We needed caching, but not just any cache. In-memory wouldn't work 
+across multiple servers. We needed distributed caching with proper 
+invalidation.
+
+Enter Redis. We built a caching layer that sits between the API and 
+the database. For cacheable endpoints, we check Redis first. Hit? 
+Return immediately (5-10ms). Miss? Fetch from database, populate cache, 
+return result.
+
+The tricky part was invalidation. We couldn't just set TTLs and hope 
+for the best—stale data would break things. We implemented event-driven 
+invalidation: when data changes (user updates profile, admin changes 
+settings), we publish an event that invalidates the relevant cache keys 
+across all servers.
+
+We also added fallback logic. If Redis goes down, the app degrades 
+gracefully—it just hits the database directly, like before. No cache 
+shouldn't mean no service.
+
+The results were dramatic. Response times dropped from 450ms to 85ms. 
+Database load fell by 60%. We handled Black Friday traffic (5x normal) 
+without adding servers.
+
+But more importantly, we learned: measure first, cache second. We spent 
+a day instrumenting the app with detailed metrics before writing a 
+single line of cache code. That data guided every decision.
+
+**Technologies:** Python, Redis, FastAPI, Prometheus, OpenTelemetry
+**Timeline:** 3 weeks (Dec 15 - Jan 5)
+```
+
+**Key features:**
+- ✅ Explains the "why"
+- ✅ Shows trade-offs and decisions
+- ✅ Includes what you learned
+- ✅ Natural storytelling flow
+
+---
 
 ### `interview`
-Focuses on the **STAR method** (Situation, Task, Action, Result).
-- **Style**: Structured sections, highlighting personal contribution.
-- **Example**: "**Situation:** API latency was high. **Action:** Implemented caching..."
+**Best for:** Job interviews, promotion reviews, behavioral questions
+
+**Focus:** The STAR method (Situation, Task, Action, Result).
+
+**Style:** Structured sections, highlighting personal contribution. Written for interviewers.
+
+**Example output:**
+
+```markdown
+## Improved API Performance Under High Load
+
+**Situation:** Our API response times were averaging 450ms, causing 
+poor user experience especially during peak hours (9am-12pm EST). 
+Multiple customers had complained, and our NPS score dropped from 42 
+to 35. The issue was particularly acute during our seasonal traffic 
+spikes, when we'd see 5-10x normal load.
+
+**Task:** I needed to reduce API response times by at least 50% without 
+increasing infrastructure costs, and do it before our Black Friday 
+sale (6 weeks away). The solution had to scale horizontally and degrade 
+gracefully if components failed.
+
+**Action:** I led the implementation of a distributed Redis caching 
+layer. First, I instrumented the API with detailed tracing to identify 
+which queries were slow and which data was being fetched repeatedly. 
+This analysis showed that 60% of queries were for data that changed 
+less than once per day.
+
+I designed a caching strategy with three tiers: hot data (5min TTL), 
+warm data (1hr TTL), and cold data (24hr TTL). I implemented event-
+driven cache invalidation so updates propagate immediately, preventing 
+stale data. I also built comprehensive monitoring (cache hit rates, 
+memory usage, latency) and automated alerting.
+
+To ensure reliability, I added fallback logic that bypasses cache if 
+Redis is unavailable, and circuit breakers that prevent cascade 
+failures.
+
+**Result:** API response times dropped from 450ms to 85ms (81% 
+improvement). Database load decreased by 60%. We handled Black Friday 
+at 5x normal traffic with zero infrastructure changes and zero 
+performance degradation.
+
+Our NPS score recovered to 44 (9-point improvement), and we got 
+positive feedback specifically mentioning "the app feels much faster." 
+The monitoring system I built caught two other performance issues in 
+the following months, preventing outages before they happened.
+
+**Technologies:** Python, Redis, FastAPI, Prometheus, OpenTelemetry  
+**Timeline:** 4 weeks solo work, 2 weeks with team for production rollout  
+**Team:** Worked independently on design/implementation, collaborated 
+with DevOps for deployment
+```
+
+**Key features:**
+- ✅ STAR format (interviewers love this)
+- ✅ Quantified results with metrics
+- ✅ Shows leadership and initiative
+- ✅ Demonstrates learning and growth
+- ✅ Clarifies team vs solo contributions
+
+---
 
 ## Usage
 
 Specify a template during generation:
 
 ```bash
-repr generate --template interview
+# Resume format (default)
+repr generate --local
+
+# Changelog format
+repr generate --template changelog --local
+
+# Narrative format
+repr generate --template narrative --local
+
+# Interview format
+repr generate --template interview --local
 ```
+
+## Template Comparison
+
+| Template | Audience | Length | Format | Best For |
+|----------|----------|--------|--------|----------|
+| **resume** | Hiring managers, leadership | Short (100-200 words) | Paragraphs + bullets | Performance reviews, portfolios |
+| **changelog** | Developers, PMs | Very short (bullets only) | Categorized bullets | Sprint demos, release notes |
+| **narrative** | Engineers, technical readers | Long (300-500 words) | Paragraphs | Blog posts, case studies |
+| **interview** | Interviewers, promotion committees | Medium (200-400 words) | STAR sections | Behavioral interviews, promotions |
+
+## When to Use Each Template
+
+### Performance Review Season?
+**Use:** `resume`  
+**Why:** Managers want quantified impact and business value. Resume format delivers exactly that.
+
+```bash
+repr generate --template resume --since "6 months ago" --local
+repr profile export --format md > performance-review.md
+```
+
+### Job Interview Next Week?
+**Use:** `interview`  
+**Why:** Behavioral questions expect STAR format. This template generates interview-ready stories.
+
+```bash
+repr generate --template interview --local
+repr stories  # Review and pick your top 5-8 stories
+repr profile export --format md > interview-prep.md
+```
+
+### Sprint Demo Tomorrow?
+**Use:** `changelog`  
+**Why:** Stakeholders want to know what shipped. Changelog format is scannable and clear.
+
+```bash
+repr since "2 weeks ago" --save
+repr generate --template changelog --local
+```
+
+### Writing a Blog Post?
+**Use:** `narrative`  
+**Why:** Blog readers want the full story—problem, solution, learnings. Narrative template tells that story.
+
+```bash
+repr generate --template narrative --repo ~/code/interesting-project --local
+repr story view 01ARYZ...  # Copy content to blog post
+```
+
+## Customizing Output
+
+Add a custom prompt to guide the LLM:
+
+```bash
+# Focus on specific aspects
+repr generate --template interview --prompt "Emphasize leadership and cross-team collaboration"
+
+# Change the voice
+repr generate --template resume --prompt "Write in first person, conversational tone"
+
+# Target specific audience
+repr generate --template changelog --prompt "Write for non-technical stakeholders, avoid jargon"
+```
+
+## Template Internals
+
+Each template uses a different system prompt that guides the LLM:
+
+- **resume**: "Write concise, impact-focused summaries with quantified results..."
+- **changelog**: "Categorize changes as Added/Fixed/Changed. Use bullet points..."
+- **narrative**: "Tell the story of this work. Start with the problem..."
+- **interview**: "Structure as Situation, Task, Action, Result. Emphasize personal contribution..."
+
+Want to see the exact prompts? Check the source:
+```bash
+# View template prompts
+cat ~/.repr/venv/lib/python3.*/site-packages/repr/templates.py
+```
+
+## Multiple Templates for Same Work
+
+You can generate different versions of the same story:
+
+```bash
+# Generate resume version
+repr generate --commits abc123,def456 --template resume
+
+# Generate interview version of same work
+repr generate --commits abc123,def456 --template interview
+
+# Generate changelog version
+repr generate --commits abc123,def456 --template changelog
+```
+
+This is useful when you need the same work described differently for different audiences.
+
+## Related Concepts
+
+- [Stories](/concepts/stories) - What gets generated
+- [Privacy Model](/concepts/privacy-model) - Where generation happens
+- [Generate Command](/reference/generate) - Full command reference
 
