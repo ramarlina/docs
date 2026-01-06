@@ -24,12 +24,14 @@
           {
             "group": "Guides",
             "pages": [
+              "guides/why-repr",
               "guides/first-time-setup",
               "guides/daily-usage",
               "guides/weekly-reflection",
               "guides/interview-prep",
               "guides/publishing",
               "guides/local-only",
+              "guides/enterprise-security",
               "guides/multi-device",
               "guides/team-workflows",
               "guides/backup-migration",

@@ -1,0 +1,499 @@
+---
+title: Enterprise & Security
+description: "Air-gapped environments, compliance, and enterprise deployment"
+icon: "shield-halved"
+---
+
+repr was built for developers who work on sensitive code. Whether you're in defense, healthcare, finance, or building a stealth startup—your code can't leave your machine.
+
+This guide covers enterprise deployment, compliance requirements, and maximum-security configurations.
+
+## Security Guarantees
+
+### What repr Never Does
+
+- ✗ Make background network calls
+- ✗ Send telemetry or analytics
+- ✗ Store API keys in config files
+- ✗ Upload code without explicit user action
+- ✗ Run daemons or background processes
+- ✗ Access your source code (only reads git metadata)
+
+### What repr Always Does
+
+- ✓ Runs entirely locally by default
+- ✓ Stores everything in `~/.repr/` on your machine
+- ✓ Uses OS keychain for sensitive data (API keys)
+- ✓ Provides audit logs of all network activity
+- ✓ Allows permanent local-only lock
+- ✓ Works in fully air-gapped environments
+
+## Air-Gapped Deployment
+
+For classified, restricted, or fully offline environments.
+
+### Installation in Air-Gapped Environments
+
+**Step 1: Download on internet-connected machine**
+
+```bash
+# On a machine with internet access
+curl -L https://github.com/repr-app/cli/releases/latest/download/repr-linux.tar.gz -o repr.tar.gz
+
+# Or for macOS
+curl -L https://github.com/repr-app/cli/releases/latest/download/repr-macos.tar.gz -o repr.tar.gz
+```
+
+**Step 2: Transfer to air-gapped machine**
+
+Use approved transfer methods (USB drive, secure file transfer, etc.)
+
+**Step 3: Install on air-gapped machine**
+
+```bash
+tar -xzf repr-linux.tar.gz
+sudo mv repr /usr/local/bin/
+chmod +x /usr/local/bin/repr
+```
+
+**Step 4: Install local LLM (Ollama)**
+
+Download Ollama and model weights on internet-connected machine:
+
+```bash
+# Download Ollama installer
+curl -L https://ollama.com/download/ollama-linux-amd64 -o ollama
+
+# Download model weights
+ollama pull llama3.2
+# Model files are stored in ~/.ollama/models/
+tar -czf ollama-models.tar.gz ~/.ollama/
+```
+
+Transfer `ollama` binary and `ollama-models.tar.gz` to air-gapped machine, then:
+
+```bash
+# Install Ollama
+sudo mv ollama /usr/local/bin/
+chmod +x /usr/local/bin/ollama
+
+# Extract models
+tar -xzf ollama-models.tar.gz -C ~/
+
+# Start Ollama service
+ollama serve &
+```
+
+**Step 5: Lock repr to local-only mode**
+
+```bash
+# Permanently disable cloud features
+repr privacy lock-local --permanent
+
+# Verify mode
+repr mode
+```
+
+Output:
+```text
+Data boundary: local only (permanently locked)
+Default inference: local
+
+Local LLM: Ollama (llama3.2)
+
+Available:
+  ✓ Local generation
+  ✗ Cloud generation (locked)
+  ✗ Sync (locked)
+  ✗ Publishing (locked)
+```
+
+**Step 6: Use normally**
+
+```bash
+repr init ~/code
+repr generate --local
+repr stories
+```
+
+### Network Verification
+
+Verify that repr makes zero network calls:
+
+```bash
+# Monitor network activity
+sudo tcpdump -i any -n host not 127.0.0.1 &
+
+# Run repr
+repr generate --local
+
+# Verify: Should show NO packets from repr process
+```
+
+You can also use `strace` (Linux) or `dtrace` (macOS) to verify no network syscalls.
+
+## Compliance Requirements
+
+### HIPAA (Healthcare)
+
+**Requirements:**
+- ✅ No PHI leaves local machine
+- ✅ Audit trail of all data access
+- ✅ Encryption at rest
+
+**repr Configuration:**
+
+```bash
+# Lock to local-only
+repr privacy lock-local --permanent
+
+# Use local LLM only
+repr llm configure
+# Select: Ollama (localhost)
+
+# Enable audit logging
+repr privacy audit --days 90 > compliance-audit.log
+```
+
+**Audit Trail:**
+
+```bash
+# Generate monthly audit report
+repr privacy audit --days 30 --json > audit-$(date +%Y-%m).json
+```
+
+Output includes:
+- All network operations (should be zero in local-only mode)
+- All story generation events (local only)
+- Data storage locations
+- Privacy settings history
+
+### SOX / PCI-DSS (Finance)
+
+**Requirements:**
+- ✅ Code doesn't leave secure environment
+- ✅ No sensitive data in logs
+- ✅ Access controls and audit trails
+
+**repr Configuration:**
+
+```bash
+# Permanent local lock
+repr privacy lock-local --permanent
+
+# Verify privacy settings
+repr privacy explain
+```
+
+**Data Redaction:**
+
+repr automatically redacts:
+- File paths (replaced with relative paths)
+- Email addresses (commit authors)
+- API keys and secrets (if accidentally committed)
+
+To verify redaction:
+
+```bash
+# Generate stories and inspect
+repr generate --local
+repr story view <id>
+# Check that absolute paths are redacted
+```
+
+### ITAR / Defense (Classified Environments)
+
+**Requirements:**
+- ✅ Zero external network access
+- ✅ Code remains on classified system
+- ✅ Auditable operations
+
+**repr Configuration:**
+
+```bash
+# Install in air-gapped environment (see above)
+repr privacy lock-local --permanent
+
+# Verify zero network capability
+repr mode
+repr privacy explain
+```
+
+**Security Audit Checklist:**
+
+- [ ] Binary installed via approved transfer method (USB)
+- [ ] No internet connectivity on target system
+- [ ] Local LLM installed and verified
+- [ ] `repr privacy lock-local --permanent` executed
+- [ ] Network monitoring shows zero external packets
+- [ ] Stories stored only in `~/.repr/` (no external storage)
+- [ ] All operations logged for audit
+
+### GDPR (EU Data Protection)
+
+**Requirements:**
+- ✅ User consent for data processing
+- ✅ Right to be forgotten
+- ✅ Data portability
+
+**repr Compliance:**
+
+repr is GDPR-compliant by default:
+
+1. **Consent:** repr never uploads data without explicit user action (`repr push`)
+2. **Right to be forgotten:** Delete local stories with `repr story delete <id>`
+3. **Data portability:** Export all data with `repr data backup`
+
+```bash
+# Export all your data (portable format)
+repr data backup --output my-data.json
+
+# Delete specific stories
+repr story delete <id>
+
+# Audit what (if anything) was sent to cloud
+repr privacy audit --days 365
+```
+
+## Enterprise Features
+
+### Multi-User Deployment
+
+Deploy repr for your entire engineering team:
+
+**1. Create standard configuration**
+
+```bash
+# Create ~/.repr/config.json template
+{
+  "llm": {
+    "default": "local",
+    "local_api_url": "http://localhost:11434/v1",
+    "local_model": "llama3.2"
+  },
+  "privacy": {
+    "lock_local_only": true,
+    "lock_permanent": false,
+    "telemetry_enabled": false
+  },
+  "generation": {
+    "max_commits_per_batch": 50,
+    "token_limit": 100000
+  }
+}
+```
+
+**2. Distribute to team**
+
+```bash
+# Package repr with config
+tar -czf repr-enterprise.tar.gz repr config.json
+
+# Distribute via your deployment system
+# Each developer extracts and runs:
+repr init ~/code
+```
+
+**3. Team workflow**
+
+```bash
+# Each developer uses repr locally
+repr hooks install --all
+repr generate --local
+
+# For team summaries (managers)
+repr repos add ~/code/team-project
+repr generate --template changelog --since "2 weeks ago"
+repr profile export --format md > sprint-summary.md
+```
+
+### Centralized LLM Deployment
+
+Run one shared Ollama instance for your team (reduces resource usage):
+
+**Server setup:**
+
+```bash
+# On a central server
+ollama serve --host 0.0.0.0:11434
+
+# Allow firewall access for your team
+sudo ufw allow from 10.0.0.0/8 to any port 11434
+```
+
+**Client configuration:**
+
+```bash
+# Each developer configures repr to use central server
+repr config set llm.local_api_url http://llm-server.company.local:11434/v1
+repr config set llm.local_model llama3.2
+```
+
+**Privacy note:** This is still "local" in that your diffs go to your company's server, not a third party.
+
+### Single Sign-On (SSO) Integration
+
+Coming soon: repr.dev cloud features will support SSO via:
+- SAML 2.0
+- OAuth 2.0 (Google, GitHub, Okta)
+- OpenID Connect
+
+In the meantime, use local-only mode for full control:
+
+```bash
+repr privacy lock-local
+```
+
+## Security Best Practices
+
+### 1. Verify Binaries
+
+Always verify repr binary authenticity:
+
+```bash
+# Download binary and signature
+curl -L https://github.com/repr-app/cli/releases/latest/download/repr-linux.tar.gz -o repr.tar.gz
+curl -L https://github.com/repr-app/cli/releases/latest/download/repr-linux.tar.gz.sha256 -o repr.sha256
+
+# Verify checksum
+sha256sum -c repr.sha256
+```
+
+### 2. Isolate repr Storage
+
+Keep repr data separate from your code:
+
+```bash
+# repr stores everything in ~/.repr/ by default
+# Optionally: mount ~/.repr/ on encrypted volume
+# or set XDG_DATA_HOME to control location
+```
+
+### 3. Backup Regularly
+
+repr stories are valuable. Back them up:
+
+```bash
+# Manual backup
+repr data backup --output ~/backups/repr-$(date +%Y%m%d).json
+
+# Automated backup (cron)
+0 0 * * 0 repr data backup --output ~/backups/repr-$(date +\%Y\%m\%d).json
+```
+
+### 4. Review Generated Content
+
+Always review stories before publishing:
+
+```bash
+# Use dry-run before pushing to cloud
+repr push --dry-run
+
+# Review stories interactively
+repr review
+```
+
+### 5. Rotate API Keys
+
+If using BYOK (Bring Your Own Key):
+
+```bash
+# Remove old key
+repr llm remove openai
+
+# Add new key
+repr llm add openai
+```
+
+Keys are stored in your OS keychain and encrypted by the OS.
+
+## Troubleshooting Security Issues
+
+### "Firewall blocked repr"
+
+repr should work behind corporate firewalls if you're using local-only mode:
+
+```bash
+# Verify local-only mode
+repr mode
+
+# If using cloud features, you'll need to whitelist:
+# - api.repr.dev (HTTPS)
+# - auth.repr.dev (HTTPS)
+```
+
+### "Security scan flagged repr binary"
+
+repr is open source. Your security team can:
+
+1. Review source code: https://github.com/repr-app/cli
+2. Build from source instead of using pre-built binaries
+3. Run security scans on the binary
+
+If your security team has concerns, open an issue: https://github.com/repr-app/cli/issues
+
+### "Ollama using too much memory"
+
+Ollama loads the entire model into RAM. For resource-constrained environments:
+
+```bash
+# Use smaller models
+ollama pull phi3  # 2GB instead of 4GB
+
+# Or use BYOK with external API
+repr llm add openai
+repr llm use byok:openai
+```
+
+## Getting Help
+
+### Enterprise Support
+
+For enterprise customers, we offer:
+
+- Priority support
+- Custom deployment assistance
+- Security questionnaire completion
+- Compliance documentation
+- On-site training
+
+Contact: enterprise@repr.dev
+
+### Security Issues
+
+Report security vulnerabilities privately:
+
+- Email: security@repr.dev
+- PGP Key: https://repr.dev/.well-known/pgp-key.txt
+
+Do not open public GitHub issues for security vulnerabilities.
+
+### Community Support
+
+For general questions:
+
+- GitHub Issues: https://github.com/repr-app/cli/issues
+- Discussions: https://github.com/repr-app/cli/discussions
+- Documentation: https://repr.dev/docs
+
+## Summary
+
+repr is designed for security-conscious developers:
+
+- ✅ **Local-first architecture** — Zero data leaves your machine by default
+- ✅ **Air-gapped support** — Works in fully offline environments
+- ✅ **Compliance-ready** — HIPAA, SOX, ITAR, GDPR compliant
+- ✅ **Audit trail** — See exactly what happened and where data went
+- ✅ **Open source** — Full transparency, build from source if needed
+
+Ready to deploy in your secure environment?
+
+```bash
+# Install and lock down
+curl -L https://github.com/repr-app/cli/releases/latest/download/repr-linux.tar.gz | tar xz
+sudo mv repr /usr/local/bin/
+repr privacy lock-local --permanent
+repr init ~/code
+```
+
+[Air-Gapped Setup Guide →](/guides/local-only) | [Privacy Model →](/concepts/privacy-model)
