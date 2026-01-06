@@ -1,0 +1,36 @@
+---
+title: repr privacy
+description: "Privacy controls and auditing"
+icon: "eye"
+---
+
+Tools to manage data boundaries and audit network activity.
+
+## Usage
+
+```bash
+repr privacy [ACTION]
+```
+
+## Actions
+
+### `explain`
+Show a summary of the current privacy guarantees based on your mode.
+```bash
+repr privacy explain
+```
+
+### `audit`
+Show a log of all data sent to the cloud (if any).
+```bash
+repr privacy audit
+```
+
+### `lock-local`
+Enforce local-only mode. Blocks all cloud features.
+```bash
+repr privacy lock-local
+# or
+repr privacy lock-local --permanent
+```
+

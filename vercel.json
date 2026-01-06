@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/docs/:path*",
+      "destination": "https://reprdev.readme.io/:path*"
+    },
+    {
+      "source": "/docs",
+      "destination": "https://reprdev.readme.io"
+    }
+  ]
+}

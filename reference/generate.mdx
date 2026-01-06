@@ -1,0 +1,44 @@
+---
+title: repr generate
+description: "Generate stories from commits"
+icon: "sparkles"
+---
+
+The `generate` command is the core of repr. It analyzes your git history and uses an LLM to write stories.
+
+## Usage
+
+```bash
+repr generate [OPTIONS]
+```
+
+## Options
+
+| Option | Description |
+|--------|-------------|
+| `--local` | Use local LLM (Ollama). Default if not signed in. |
+| `--cloud` | Use cloud LLM. Default if signed in. |
+| `--template <name>` | Template to use (`resume`, `changelog`, `narrative`, `interview`). |
+| `--repo <path>` | Only generate for a specific repository. |
+| `--commits <shas>` | Comma-separated list of commit SHAs to generate from. |
+| `--batch-size <n>` | Number of commits to group into one story (default: 5). |
+| `--dry-run` | Preview what would be sent/generated without saving. |
+| `--prompt <text>` | Append custom instructions to the system prompt. |
+
+## Examples
+
+Generate using local LLM:
+```bash
+repr generate --local
+```
+
+Generate using specific template:
+```bash
+repr generate --template interview
+```
+
+Generate from specific commits:
+```bash
+repr generate --commits a1b2c3d,e5f6g7h
+```
+

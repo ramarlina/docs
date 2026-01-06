@@ -1,0 +1,783 @@
+---
+title: Troubleshooting
+description: "Fix common issues and diagnose problems"
+icon: "wrench"
+---
+
+Repr not working? Something feels off? Let's debug it.
+
+This guide covers the most common issues and how to fix them. Start with the health check, then jump to your specific problem.
+
+## The Universal Fix: Run Doctor
+
+When something's wrong, start here:
+
+```bash
+repr doctor
+```
+
+Output:
+```text
+Checking repr health...
+
+✓ Config: valid (v3)
+✓ Stories: 45 files, no corruption detected
+✓ Local LLM: Ollama (llama3.2) - connected
+✓ Git: 2.40.0 - found
+✓ Tracked repos: 5 repositories
+⚠ Repo warning: 1 missing (/old/path/deleted-repo)
+
+Recommendations:
+  1. Remove missing repo: repr repos remove /old/path/deleted-repo
+  
+Overall health: Good (1 warning)
+```
+
+This catches 80% of issues. If there's a problem, `repr doctor` tells you how to fix it.
+
+Still broken? Read on.
+
+## Common Issues
+
+### "Local LLM not found"
+
+**Symptoms:**
+```text
+Error: Cannot connect to local LLM
+Tried: http://localhost:11434/v1
+Connection refused
+```
+
+**Causes:**
+- Ollama (or your local LLM) isn't running
+- Wrong endpoint configured
+
+**Fix:**
+
+<Steps>
+  <Step title="Check if Ollama is running">
+    ```bash
+    # Try to reach Ollama
+    curl http://localhost:11434/api/tags
+    ```
+
+    If you get "connection refused", Ollama isn't running.
+  </Step>
+
+  <Step title="Start Ollama">
+    ```bash
+    # macOS/Linux
+    ollama serve
+    
+    # Or if installed via Homebrew, it should auto-start
+    brew services start ollama
+    ```
+  </Step>
+
+  <Step title="Pull a model if you haven't">
+    ```bash
+    ollama pull llama3.2
+    ```
+  </Step>
+
+  <Step title="Test the connection">
+    ```bash
+    repr llm test
+    ```
+
+    Should show:
+    ```text
+    ✓ Local LLM: Connected
+    ✓ Model: llama3.2
+    ✓ Response time: 234ms
+    ```
+  </Step>
+</Steps>
+
+**Still broken?**
+
+Maybe your LLM is on a different port:
+
+```bash
+# Check what's running
+lsof -i :11434
+
+# If it's on a different port, configure repr
+repr config set llm.local_api_url http://localhost:YOUR_PORT/v1
+repr llm test
+```
+
+---
+
+### "Not authenticated" / "Auth token expired"
+
+**Symptoms:**
+```text
+Error: Not authenticated
+Run 'repr login' to sign in
+```
+
+Or:
+```text
+Error: Auth token expired
+Please login again
+```
+
+**Fix:**
+
+```bash
+repr login
+```
+
+This opens your browser for re-authentication. Once you sign in, you're good.
+
+**Don't want to use cloud?**
+
+If you're getting auth errors but want local-only mode:
+
+```bash
+repr privacy lock-local
+```
+
+Now repr won't try to authenticate. It'll only use local features.
+
+---
+
+### "Repository not tracked"
+
+**Symptoms:**
+```text
+Error: Repository ~/code/my-project not tracked
+Run 'repr repos add ~/code/my-project' to track it
+```
+
+**Fix:**
+
+```bash
+# Add the repo
+repr repos add ~/code/my-project
+
+# Or add multiple at once
+repr repos add ~/code/project-1 ~/code/project-2
+
+# Or re-scan your code directory
+repr init ~/code
+```
+
+**Check what's tracked:**
+
+```bash
+repr repos list
+```
+
+Output:
+```text
+Tracked Repositories:
+
+✓ ~/code/my-project (active, 143 commits)
+✓ ~/code/frontend-app (active, 87 commits)
+⚠ ~/code/old-project (missing - directory not found)
+
+Total: 3 tracked (2 active, 1 missing)
+```
+
+**Remove repos you don't want:**
+
+```bash
+repr repos remove ~/code/old-project
+```
+
+---
+
+### "Git hook not working" / "Commits not being queued"
+
+**Symptoms:**
+
+You've installed hooks, but when you commit, nothing happens. `repr hooks status` shows hooks aren't firing.
+
+**Diagnose:**
+
+```bash
+repr hooks status
+```
+
+Output:
+```text
+Hook Status:
+
+~/code/my-project:
+  post-commit: ✗ Not installed
+  
+~/code/frontend-app:
+  post-commit: ✓ Installed
+  Last triggered: Never
+```
+
+**Fix:**
+
+<Steps>
+  <Step title="Reinstall hooks">
+    ```bash
+    repr hooks install --all
+    ```
+
+    This re-installs hooks in all tracked repos.
+  </Step>
+
+  <Step title="Check for conflicting hooks">
+    Some repos have existing hooks that might conflict:
+
+    ```bash
+    ls -la ~/code/my-project/.git/hooks/
+    ```
+
+    If you see `post-commit.old` or `post-commit.sample`, there was a pre-existing hook.
+
+    Repr tries to be smart and chain hooks, but occasionally this fails. Manually check `.git/hooks/post-commit` and make sure it includes the repr hook.
+  </Step>
+
+  <Step title="Test manually">
+    Make a commit and check if it queued:
+
+    ```bash
+    cd ~/code/my-project
+    git commit --allow-empty -m "Test hook"
+    
+    # Check if it was queued
+    repr hooks status
+    ```
+
+    Look for "Last triggered" to update.
+  </Step>
+</Steps>
+
+**Still not working?**
+
+The hook might be erroring silently. Check the hook script:
+
+```bash
+cat ~/code/my-project/.git/hooks/post-commit
+```
+
+You should see something like:
+
+```bash
+#!/bin/sh
+repr hooks post-commit "$PWD" "$1" || true
+```
+
+If that's missing, reinstall:
+
+```bash
+repr hooks install --repo ~/code/my-project
+```
+
+---
+
+### "Corrupted config"
+
+**Symptoms:**
+```text
+Error: Config file corrupted or invalid
+Location: ~/.repr/config.json
+```
+
+**Fix:**
+
+<Steps>
+  <Step title="Back up your config (just in case)">
+    ```bash
+    cp ~/.repr/config.json ~/.repr/config.json.backup
+    ```
+  </Step>
+
+  <Step title="Try to view the config">
+    ```bash
+    cat ~/.repr/config.json
+    ```
+
+    If it's valid JSON, you can manually fix it. If it's completely broken, reset it:
+  </Step>
+
+  <Step title="Reset config to defaults">
+    ```bash
+    repr config reset
+    ```
+
+    This creates a fresh config file. You'll need to reconfigure:
+
+    ```bash
+    repr init ~/code
+    repr llm configure
+    ```
+  </Step>
+</Steps>
+
+**Restore specific settings:**
+
+If you have a backup, you can merge settings:
+
+```bash
+# Edit config manually
+repr config edit
+```
+
+This opens `~/.repr/config.json` in your `$EDITOR`. Copy settings from your backup.
+
+---
+
+### "Out of disk space" / "Slow performance"
+
+**Symptoms:**
+
+Repr is slow or you're running out of disk space.
+
+**Check storage:**
+
+```bash
+repr data
+```
+
+Output:
+```text
+Local Data Storage
+
+Stories: 2.1 MB
+Profiles: 340 KB
+Cache: 1.2 GB  ← Might be large
+Config: 8 KB
+Total: 1.5 GB
+```
+
+**Fix:**
+
+```bash
+# Clear cache (keeps stories and config)
+repr data clear-cache
+```
+
+This can free up significant space. Repr caches LLM responses and intermediate data. Clearing the cache won't delete your stories.
+
+**Still slow?**
+
+Your local LLM might be underpowered:
+
+```bash
+repr llm test
+```
+
+If response time is >5 seconds, consider:
+- Using a smaller model: `ollama pull phi3` (lighter than llama3.2)
+- Using cloud LLM: `repr generate --cloud` (requires login)
+- Using BYOK: `repr llm add openai` (your own API key)
+
+---
+
+### "Sync conflicts" / "Can't push to cloud"
+
+**Symptoms:**
+```text
+Error: Sync conflict detected
+Story 01ABC... edited on multiple devices
+
+Or:
+
+Error: Push failed
+Server returned 409 Conflict
+```
+
+**Diagnose:**
+
+```bash
+repr status
+```
+
+Shows:
+```text
+Sync status:
+  ⚠ 1 conflict to resolve
+  ↓ 2 remote stories newer than local
+  ↑ 3 local stories not on remote
+```
+
+**Fix:**
+
+<Steps>
+  <Step title="Force pull (use remote version)">
+    ```bash
+    repr pull --force
+    ```
+
+    This overwrites your local changes with the remote version. Your local edits are backed up to `~/.repr/conflicts/`.
+  </Step>
+
+  <Step title="Or force push (use local version)">
+    ```bash
+    repr push --force
+    ```
+
+    This overwrites the remote with your local version.
+  </Step>
+
+  <Step title="Or manually resolve">
+    Check the conflict directory:
+
+    ```bash
+    ls ~/.repr/conflicts/
+    cat ~/.repr/conflicts/01ABC....json
+    ```
+
+    Pick the version you want and manually restore it:
+
+    ```bash
+    cp ~/.repr/conflicts/01ABC....json ~/.repr/stories/
+    ```
+  </Step>
+</Steps>
+
+**Prevent conflicts:**
+
+Always sync before working:
+
+```bash
+repr pull  # Start of session
+# ... do work ...
+repr push  # End of session
+```
+
+---
+
+### "Stories not generating" / "LLM errors"
+
+**Symptoms:**
+```text
+Error: Failed to generate stories
+LLM returned error: 500 Internal Server Error
+
+Or:
+
+Generating stories...
+[Long pause, then timeout]
+```
+
+**Diagnose:**
+
+```bash
+# Test your LLM connection
+repr llm test
+```
+
+**Common causes:**
+
+1. **Local LLM crashed**: Restart Ollama
+   ```bash
+   pkill ollama
+   ollama serve
+   ```
+
+2. **Model not loaded**: Pull the model again
+   ```bash
+   ollama pull llama3.2
+   ```
+
+3. **Out of memory**: Your model is too big for your RAM
+   ```bash
+   # Try a smaller model
+   ollama pull phi3
+   repr config set llm.local_model phi3
+   ```
+
+4. **API rate limit (BYOK)**: You hit your provider's rate limit
+   ```text
+   Error: Rate limit exceeded
+   ```
+   
+   Wait a few minutes or switch providers:
+   ```bash
+   repr llm use byok:anthropic
+   ```
+
+---
+
+### "Can't find repr command" / "Command not found"
+
+**Symptoms:**
+```bash
+$ repr
+-bash: repr: command not found
+```
+
+**Fix:**
+
+<Steps>
+  <Step title="Check if repr is installed">
+    ```bash
+    which repr
+    ```
+
+    If nothing shows up, repr isn't in your PATH.
+  </Step>
+
+  <Step title="If installed via Homebrew">
+    ```bash
+    brew list repr
+    
+    # If not found, reinstall
+    brew install repr
+    ```
+  </Step>
+
+  <Step title="If installed via pipx">
+    ```bash
+    pipx list | grep repr
+    
+    # If not found, reinstall
+    pipx install repr-cli
+    
+    # Make sure pipx bin dir is in PATH
+    pipx ensurepath
+    ```
+
+    Close and reopen your terminal.
+  </Step>
+
+  <Step title="Verify installation">
+    ```bash
+    repr --version
+    ```
+
+    Should show: `repr version 0.2.0` (or similar)
+  </Step>
+</Steps>
+
+---
+
+## Debugging Commands
+
+When reporting issues or digging deeper, these commands help:
+
+### Check Version
+
+```bash
+repr --version
+```
+
+### Check Auth Status
+
+```bash
+repr whoami
+```
+
+Output:
+```text
+Authenticated as: you@example.com
+Account ID: usr_abc123
+Mode: Cloud (connected)
+```
+
+Or:
+```text
+Not authenticated (local-only mode)
+```
+
+### Check Configuration
+
+```bash
+# Show all config
+repr config show
+
+# Show specific setting
+repr config show llm.default
+repr config show llm.local_api_url
+
+# Export as JSON (easier to share)
+repr config show --json
+```
+
+### Check Repo Status
+
+```bash
+repr repos --json
+```
+
+Returns JSON with all tracked repos, their paths, and status.
+
+### Check Hook Queue
+
+```bash
+repr hooks status --json
+```
+
+Shows pending commits waiting to be processed.
+
+### Check Privacy/Network Audit
+
+```bash
+repr privacy audit --days 7 --json
+```
+
+Shows all network activity for the last 7 days in JSON format.
+
+### Run Full Diagnostics
+
+```bash
+repr doctor --verbose
+```
+
+More detailed output than standard `repr doctor`.
+
+---
+
+## Getting Help
+
+### 1. Check the Docs
+
+- [Commands Reference](/reference/commands)
+- [Configuration](/configuration)
+- [Privacy Model](/concepts/privacy-model)
+
+### 2. Run Doctor
+
+```bash
+repr doctor
+```
+
+This catches most issues automatically.
+
+### 3. Check GitHub Issues
+
+Search existing issues: https://github.com/repr-app/cli/issues
+
+Someone might have already solved your problem.
+
+### 4. File a Bug Report
+
+If nothing works, file an issue:
+
+```bash
+# Collect debug info
+repr doctor --verbose > debug-info.txt
+repr config show --json >> debug-info.txt
+
+# Attach debug-info.txt to your GitHub issue
+```
+
+Include:
+- What you were trying to do
+- What happened (error message)
+- `repr --version`
+- Output of `repr doctor`
+- Operating system (macOS, Linux, Windows)
+
+---
+
+## Edge Cases
+
+### repr Works, But Stories Are Bad Quality
+
+Not a bug—this is an LLM problem.
+
+**Fixes:**
+
+1. **Try a different model**:
+   ```bash
+   ollama pull codellama
+   repr config set llm.local_model codellama
+   ```
+
+2. **Use a better LLM via BYOK**:
+   ```bash
+   repr llm add openai
+   repr llm use byok:openai
+   ```
+   OpenAI's models are generally better than open-source local models.
+
+3. **Add context with custom prompts**:
+   ```bash
+   repr generate --prompt "Focus on user impact and business value"
+   ```
+
+4. **Edit stories manually**:
+   ```bash
+   repr story edit <id>
+   ```
+   Polish them yourself. Repr gives you the 80% draft, you add the 20% polish.
+
+---
+
+### repr Is Too Slow
+
+**Causes:**
+- Local LLM is underpowered
+- Processing too many commits at once
+- Disk I/O bottleneck
+
+**Fixes:**
+
+```bash
+# Use smaller batch size
+repr generate --batch-size 3
+
+# Switch to cloud (faster)
+repr generate --cloud
+
+# Or use BYOK with a fast provider (Groq is very fast)
+repr llm add groq
+repr llm use byok:groq
+```
+
+---
+
+### "Permission denied" Errors
+
+**Symptoms:**
+```text
+Error: Permission denied
+Cannot write to ~/.repr/stories
+```
+
+**Fix:**
+
+```bash
+# Check permissions
+ls -la ~/.repr
+
+# Fix if needed
+chmod -R u+w ~/.repr
+```
+
+If on a corporate machine with restrictive permissions, you might need to:
+
+```bash
+# Use a different directory
+repr config set storage.path ~/Documents/repr-data
+```
+
+---
+
+## Still Stuck?
+
+If none of this helps:
+
+1. **Try a fresh install**:
+   ```bash
+   # Backup your data first
+   repr data backup --output ~/repr-backup.json
+   
+   # Uninstall
+   brew uninstall repr  # or: pipx uninstall repr-cli
+   
+   # Reinstall
+   brew install repr  # or: pipx install repr-cli
+   
+   # Restore
+   repr data restore ~/repr-backup.json
+   ```
+
+2. **Ask for help**:
+   - GitHub Issues: https://github.com/repr-app/cli/issues
+   - Discord: https://repr.dev/discord (if available)
+   - Email: support@repr.dev
+
+Include the output of `repr doctor` when asking for help. Makes debugging way easier.
+

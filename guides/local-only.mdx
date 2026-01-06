@@ -1,0 +1,315 @@
+---
+title: Privacy-First Mode
+description: "Use repr entirely offline with maximum privacy"
+icon: "shield-check"
+---
+
+Some code can't leave your machine. Maybe you work in healthcare, finance, or defense. Maybe you're building a stealth startup. Maybe you just really value privacy.
+
+Good news: **repr was built for this**. It's local-first by default, and you can lock it down to guarantee nothing ever leaves your machine—not your code, not your diffs, not even metadata.
+
+Here's how to run repr in maximum privacy mode.
+
+## Lock It Down: Local-Only Mode
+
+You can explicitly lock repr to prevent any accidental cloud operations:
+
+```bash
+# Reversible lock (you can unlock later)
+repr privacy lock-local
+
+# Or go permanent (disables cloud features entirely)
+repr privacy lock-local --permanent
+```
+
+Once locked, repr will:
+- ✅ Block `repr push`, `repr sync`, and `repr login`
+- ✅ Refuse to make any network calls except to your local LLM
+- ✅ Store everything in `~/.repr/` on your machine
+- ✅ Show a warning if any command tries to access the network
+
+You can check your current mode anytime:
+
+```bash
+repr mode
+```
+
+Output:
+```text
+Current mode: LOCAL_ONLY (locked)
+
+Network policy:
+  ✓ Allowed: 127.0.0.1, localhost, ::1 (loopback only)
+  ✗ Blocked: All external network traffic
+  
+LLM: Local (Ollama - llama3.2)
+Sync: Disabled
+Auth: Not signed in (login disabled)
+```
+
+## Set Up Your Local LLM
+
+To use repr offline, you need a local language model. We recommend [Ollama](https://ollama.com)—it's free, fast, and runs on your laptop.
+
+<Steps>
+  <Step title="Install Ollama">
+    Download from [ollama.com](https://ollama.com) or install via Homebrew:
+
+    ```bash
+    brew install ollama
+    ```
+  </Step>
+
+  <Step title="Start the Ollama service">
+    ```bash
+    ollama serve
+    ```
+
+    This runs a local API server at `http://localhost:11434`. No data leaves your machine.
+  </Step>
+
+  <Step title="Download a model">
+    Pick a model that fits your hardware:
+
+    ```bash
+    # Recommended: Fast, good quality (4GB RAM)
+    ollama pull llama3.2
+
+    # Lighter: Lower quality but faster (2GB RAM)
+    ollama pull phi3
+
+    # Coding-focused: Better at technical summaries (7GB RAM)
+    ollama pull codellama
+    ```
+
+    First pull takes a few minutes. After that, it's instant.
+  </Step>
+
+  <Step title="Configure repr to use Ollama">
+    Run the interactive setup:
+
+    ```bash
+    repr llm configure
+    ```
+
+    Repr will auto-detect Ollama and show available models:
+
+    ```text
+    Detected local LLM: Ollama
+    Available models:
+      1. llama3.2 (4.7GB) - Recommended
+      2. phi3 (2.3GB) - Lightweight  
+      3. codellama (7.1GB) - Code-focused
+    
+    Select model [1]: 1
+    
+    ✓ Configured local LLM: Ollama (llama3.2)
+    ✓ Testing connection...
+    ✓ Connection successful (234ms response time)
+    ```
+  </Step>
+
+  <Step title="Verify it works">
+    Test your local LLM connection:
+
+    ```bash
+    repr llm test
+    ```
+
+    Output:
+    ```text
+    Local LLM Health Check
+    
+    Provider: Ollama
+    Endpoint: http://localhost:11434/v1
+    Model: llama3.2
+    
+    ✓ Connection successful
+    ✓ Model available
+    ✓ Response time: 234ms
+    ✓ Test generation: PASSED
+    
+    Your local LLM is ready to use.
+    ```
+  </Step>
+</Steps>
+
+Now you're set. Every time you run `repr generate --local`, it uses your local model—no data leaves your machine.
+
+## Alternative: Bring Your Own Keys (BYOK)
+
+Maybe you don't want to run a local LLM (not enough RAM, laptop gets hot, whatever). You can still avoid repr's servers by using your own API keys with OpenAI, Anthropic, or other providers.
+
+Your keys are stored in your **OS keychain** (macOS Keychain, Windows Credential Manager, Linux Secret Service)—not in repr's config file.
+
+```bash
+# Add your OpenAI key
+repr llm add openai
+# API Key: sk-proj-... [hidden]
+# 
+# ✓ Key saved to system keychain
+# ✓ Testing connection...
+# ✓ Connection successful
+
+# Or Anthropic
+repr llm add anthropic
+# API Key: sk-ant-... [hidden]
+
+# Or Groq (fast, free tier available)
+repr llm add groq
+
+# Or Together AI
+repr llm add together
+```
+
+Set your preferred provider as default:
+
+```bash
+repr llm use byok:openai
+```
+
+Now when you run `repr generate`, it calls OpenAI directly with your key. Repr's servers never see your data.
+
+**Network policy with BYOK:**
+- ✅ Direct connection to `api.openai.com` (or your chosen provider)
+- ✅ No data goes through repr.dev servers
+- ✅ Your code and diffs are sent only to your API provider
+- ✅ Keys stored in OS keychain, not config files
+
+## How Private Is This?
+
+Let's be crystal clear about what happens in each mode:
+
+### Local-Only Mode (Ollama)
+
+```bash
+repr generate --local
+```
+
+**Data flow:**
+1. Repr reads commits from your local git repos
+2. Diffs are sent to `http://localhost:11434` (your machine)
+3. Ollama processes them locally
+4. Stories are saved to `~/.repr/stories` (your machine)
+
+**Network calls:** Zero. Nothing leaves your machine.
+
+### BYOK Mode (Your API Keys)
+
+```bash
+repr llm add openai
+repr generate
+```
+
+**Data flow:**
+1. Repr reads commits from your local git repos  
+2. Diffs are sent directly to `api.openai.com` (or your provider)
+3. OpenAI processes them and returns stories
+4. Stories are saved to `~/.repr/stories` (your machine)
+
+**Network calls:** Direct to your API provider. Repr's servers never see the data.
+
+### Cloud Mode (repr.dev)
+
+```bash
+repr login
+repr generate --cloud
+```
+
+**Data flow:**
+1. Repr reads commits from your local git repos
+2. Diffs are sent to `api.repr.dev` for processing
+3. Stories are generated and synced to your account
+4. Stories are saved locally and in the cloud
+
+**Network calls:** To repr.dev. You control when this happens (explicit `push`, `pull`, `sync` commands).
+
+## Verify Your Privacy Settings
+
+You can audit exactly what repr has done:
+
+```bash
+# Show current privacy mode
+repr privacy explain
+```
+
+Output:
+```text
+ARCHITECTURE:
+  ✓ No background daemons or silent uploads
+  ✓ All network calls are foreground, user-initiated
+  ✓ No telemetry by default (opt-in only)
+  ✓ Code never leaves your machine
+
+LOCAL MODE NETWORK POLICY:
+  Allowed: 127.0.0.1, localhost, ::1 (loopback only)
+  Blocked: All external network
+
+DATA STORAGE:
+  Stories: ~/.repr/stories (JSON files, human-readable)
+  Config: ~/.repr/config.json
+  Queue: ~/.repr/queue (pending commits)
+  
+CLOUD SYNC: Disabled (local-only mode active)
+```
+
+Want to see a log of network activity?
+
+```bash
+# Audit last 30 days
+repr privacy audit
+
+# Just last week
+repr privacy audit --days 7
+
+# JSON format for scripting
+repr privacy audit --json
+```
+
+Output:
+```text
+Network Activity Audit (Last 30 days)
+
+No network activity detected.
+
+Local operations:
+  • 143 commits analyzed
+  • 23 stories generated  
+  • 0 cloud syncs
+  • 0 API calls to repr.dev
+
+Mode: LOCAL_ONLY (locked)
+```
+
+## Air-Gapped or Restricted Networks
+
+Working in a truly air-gapped environment? No problem.
+
+1. **Install repr offline**: Download the binary on a connected machine, transfer via USB
+2. **Transfer model weights**: Download Ollama models on a connected machine, copy to the air-gapped system
+3. **Lock to local-only**: `repr privacy lock-local --permanent`
+
+Repr will work entirely offline. No network required after initial setup.
+
+## Unlock Later (If Needed)
+
+Changed your mind? Want to enable cloud sync?
+
+```bash
+# If you used reversible lock
+repr privacy unlock-local
+
+# If you used --permanent, you'll need to reinstall or reconfigure
+```
+
+## The Bottom Line
+
+Repr respects your privacy by default. But if you need **guaranteed** local-only operation:
+
+1. Lock it: `repr privacy lock-local`
+2. Use Ollama: `repr llm configure` → select Ollama
+3. Verify: `repr privacy explain`
+4. Generate: `repr generate --local`
+
+Your code stays on your machine. Always.
+

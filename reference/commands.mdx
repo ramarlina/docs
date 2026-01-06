@@ -1,0 +1,99 @@
+---
+title: Command Reference
+description: "Complete list of repr CLI commands"
+icon: "terminal"
+---
+
+## Setup & Status
+
+| Command | Description |
+|---------|-------------|
+| `repr init [path]` | Initialize repr and scan for repositories. |
+| `repr status` | Show overall health and sync status. |
+| `repr mode` | Show current execution mode (local/cloud/locked). |
+| `repr doctor` | Run full diagnostics. |
+| `repr whoami` | Show current authenticated user. |
+
+## Story Generation
+
+| Command | Description |
+|---------|-------------|
+| `repr generate --local` | Generate stories using local LLM. |
+| `repr generate --cloud` | Generate stories using cloud LLM. |
+| `repr generate --template <name>` | Use a specific template (resume, changelog, narrative, interview). |
+| `repr generate --dry-run` | Preview what would be sent/generated. |
+
+## Quick Summaries
+
+| Command | Description |
+|---------|-------------|
+| `repr week` | Show work from the last 7 days. |
+| `repr standup` | Show work from the last 3 days. |
+| `repr since <date>` | Show work since a specific date or time. |
+| `repr since <date> --save` | Save the summary as a permanent story. |
+
+## Story Management
+
+| Command | Description |
+|---------|-------------|
+| `repr stories` | List all generated stories. |
+| `repr story view <id>` | View story content. |
+| `repr story edit <id>` | Edit story in your default `$EDITOR`. |
+| `repr story delete <id>` | Delete a story. |
+| `repr story hide <id>` | Hide story from public profile. |
+| `repr story feature <id>` | Pin story to top of profile. |
+| `repr review` | Interactive review mode for new stories. |
+
+## Repository Management
+
+| Command | Description |
+|---------|-------------|
+| `repr repos` | List tracked repositories. |
+| `repr repos add <path>` | Add a repository to track. |
+| `repr repos remove <path>` | Stop tracking a repository. |
+| `repr repos pause <path>` | Pause tracking for a repo temporarily. |
+| `repr repos resume <path>` | Resume tracking. |
+
+## Hooks
+
+| Command | Description |
+|---------|-------------|
+| `repr hooks install --all` | Install git hooks in all tracked repos. |
+| `repr hooks remove --all` | Remove git hooks from all repos. |
+| `repr hooks status` | Check status of installed hooks. |
+
+## Cloud Operations
+
+| Command | Description |
+|---------|-------------|
+| `repr login` | Authenticate with repr.dev. |
+| `repr logout` | Sign out. |
+| `repr push` | Publish/upload stories. |
+| `repr sync` | Bidirectional sync with cloud. |
+| `repr pull` | Download stories from cloud. |
+
+## LLM Configuration
+
+| Command | Description |
+|---------|-------------|
+| `repr llm configure` | Interactive setup for local/cloud LLM. |
+| `repr llm test` | Test connection to LLM provider. |
+| `repr llm add <provider>` | Add BYOK API key (openai, anthropic, etc). |
+| `repr llm use <mode>` | Set default mode (local, cloud, byok:provider). |
+
+## Privacy
+
+| Command | Description |
+|---------|-------------|
+| `repr privacy explain` | Show privacy summary. |
+| `repr privacy audit` | Show log of data sent to cloud. |
+| `repr privacy lock-local` | Disable all cloud features. |
+
+## Profile & Export
+
+| Command | Description |
+|---------|-------------|
+| `repr profile` | View current profile settings. |
+| `repr profile export` | Export profile to Markdown or JSON. |
+| `repr profile link` | Get public profile URL. |
+

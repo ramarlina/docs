@@ -1,0 +1,63 @@
+---
+title: LLM Setup
+description: "Configure Local, Cloud, or BYOK models"
+icon: "microchip"
+---
+
+Repr relies on Large Language Models (LLMs) to understand your code changes and write stories. You can choose where this processing happens.
+
+## Option 1: Local LLM (Recommended for Privacy)
+
+Run an LLM on your own machine. Requires [Ollama](https://ollama.com).
+
+1. **Install Ollama** and pull a model:
+   ```bash
+   ollama pull llama3.2
+   ```
+
+2. **Configure repr**:
+   ```bash
+   repr llm configure
+   # Select "Ollama" from the list
+   ```
+
+3. **Verify**:
+   ```bash
+   repr llm test
+   ```
+
+## Option 2: Bring Your Own Key (BYOK)
+
+Use a commercial model like GPT-4 or Claude without sending data to repr's servers.
+
+1. **Add your key**:
+   ```bash
+   repr llm add openai
+   # Enter your sk-... key (stored securely in OS keychain)
+   ```
+
+2. **Set as default**:
+   ```bash
+   repr llm use byok:openai
+   ```
+
+Supported providers: `openai`, `anthropic`, `groq`, `together`.
+
+## Option 3: Cloud LLM
+
+Let repr manage the models for you. Requires signing in.
+
+1. **Login**:
+   ```bash
+   repr login
+   ```
+
+2. **Set as default**:
+   ```bash
+   repr llm use cloud
+   ```
+
+<Note>
+Cloud generation requires a subscription plan on repr.dev (free tier available).
+</Note>
+

@@ -1,0 +1,56 @@
+---
+title: repr stories
+description: "Manage your generated stories"
+icon: "book"
+---
+
+Commands for listing, viewing, and managing the stories you have generated.
+
+## Usage
+
+```bash
+repr stories [OPTIONS]
+repr story <action> <id>
+```
+
+## Subcommands
+
+### `list` (default)
+Lists all stories.
+
+**Options:**
+- `--repo <name>`: Filter by repository name.
+- `--needs-review`: Show only stories marked for review.
+- `--json`: Output raw JSON.
+
+### `view`
+Display the full content of a story.
+```bash
+repr story view 01ARYZ...
+```
+
+### `edit`
+Open the story in your default `$EDITOR`.
+```bash
+repr story edit 01ARYZ...
+```
+
+### `delete`
+Permanently remove a story.
+```bash
+repr story delete 01ARYZ...
+```
+
+### `hide` / `feature`
+Toggle visibility flags for your profile.
+```bash
+repr story hide 01ARYZ...    # Don't show on profile
+repr story feature 01ARYZ... # Pin to top of profile
+```
+
+### `review`
+Interactive mode to review newly generated stories.
+```bash
+repr review
+```
+

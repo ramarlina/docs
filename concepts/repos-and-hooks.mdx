@@ -1,0 +1,31 @@
+---
+title: Repos & Hooks
+description: "How repr tracks your work"
+icon: "git-alt"
+---
+
+## Repositories
+
+Repr needs to know which folders to watch. You "track" a repository by adding it to repr's configuration.
+
+- **Discovery**: `repr init` automatically finds git repos in a directory.
+- **Manual Add**: `repr repos add ~/path/to/repo` adds a specific repo.
+
+## Git Hooks
+
+To make tracking automatic, repr can install a `post-commit` hook in your repositories.
+
+### How it works
+1. You run `git commit`.
+2. The hook triggers `repr hooks queue <sha>`.
+3. The commit SHA is added to a local queue file in `~/.repr/queues/`.
+4. The hook finishes instantly (no network calls, no LLM processing).
+
+### Processing the Queue
+When you later run `repr generate`, repr checks the queue and processes all pending commits into stories.
+
+### Managing Hooks
+- **Install**: `repr hooks install --all`
+- **Remove**: `repr hooks remove --all`
+- **Check**: `repr hooks status`
+

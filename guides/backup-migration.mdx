@@ -1,0 +1,460 @@
+---
+title: Backup & Migration
+description: "Back up your data and migrate between machines"
+icon: "box-archive"
+---
+
+Your repr stories are valuable. They represent months (or years) of work you've shipped. You don't want to lose them.
+
+Good news: repr stores everything as plain JSON files in `~/.repr/`. But having an explicit backup workflow is still smart. Here's how.
+
+## Quick Backup
+
+Want a backup right now? One command:
+
+```bash
+repr data backup --output ~/backups/repr-backup-$(date +%Y-%m-%d).json
+```
+
+Output:
+```text
+Creating backup...
+
+✓ Stories: 45 files (2.1 MB)
+✓ Profiles: 3 files (340 KB)
+✓ Config: 1 file (8 KB)
+
+Backup saved to:
+  ~/backups/repr-backup-2026-01-05.json
+
+Total size: 2.5 MB
+```
+
+Done. You now have a complete backup of all your repr data in a single JSON file.
+
+## What Gets Backed Up?
+
+The backup includes:
+
+- ✅ **All stories** (titles, narratives, metadata, featured/hidden status)
+- ✅ **Profile settings** (bio, location, availability)
+- ✅ **Configuration** (LLM settings, tracked repos, hooks)
+- ✅ **Queue** (pending commits waiting for generation)
+
+**What doesn't get backed up:**
+- ❌ Your git repositories (use git for that)
+- ❌ Your API keys (stored in OS keychain, not in repr)
+- ❌ Auth tokens (you'll re-login after restore)
+
+## Where to Store Backups
+
+Some good options:
+
+### 1. Cloud Storage (Recommended)
+
+```bash
+# Backup to Dropbox
+repr data backup --output ~/Dropbox/repr-backup.json
+
+# Backup to Google Drive
+repr data backup --output ~/Google\ Drive/repr-backup.json
+
+# Backup to iCloud
+repr data backup --output ~/Library/Mobile\ Documents/com~apple~CloudDocs/repr-backup.json
+```
+
+Now your backup syncs automatically across devices and stays safe in the cloud.
+
+### 2. External Drive
+
+```bash
+repr data backup --output /Volumes/Backup/repr-backup-$(date +%Y-%m-%d).json
+```
+
+Good for air-gapped systems or if you don't trust cloud storage.
+
+### 3. Version Control
+
+```bash
+# Backup to a git repo
+repr data backup --output ~/backup-repo/repr-$(date +%Y-%m-%d).json
+cd ~/backup-repo
+git add .
+git commit -m "Backup $(date +%Y-%m-%d)"
+git push
+```
+
+Gives you version history of your backups. Useful if you want to roll back to an earlier state.
+
+## Automated Backups
+
+Don't rely on remembering to run backups. Automate it.
+
+### Weekly Backup (macOS)
+
+Create a launchd service:
+
+```bash
+# Create the backup script
+cat > ~/scripts/repr-backup.sh << 'EOF'
+#!/bin/bash
+BACKUP_DIR=~/Dropbox/repr-backups
+mkdir -p "$BACKUP_DIR"
+repr data backup --output "$BACKUP_DIR/repr-$(date +%Y-%m-%d).json"
+# Keep only last 10 backups
+ls -t "$BACKUP_DIR"/repr-*.json | tail -n +11 | xargs rm -f
+EOF
+
+chmod +x ~/scripts/repr-backup.sh
+
+# Test it
+~/scripts/repr-backup.sh
+```
+
+Then set up a weekly cron job:
+
+```bash
+crontab -e
+
+# Add this line (runs every Sunday at 8pm)
+0 20 * * 0 ~/scripts/repr-backup.sh
+```
+
+### Weekly Backup (Linux)
+
+Same script, same cron job. Works everywhere.
+
+### Weekly Backup (Windows)
+
+Use Task Scheduler to run:
+
+```batch
+repr data backup --output %USERPROFILE%\Dropbox\repr-backup-%date:~-4,4%-%date:~-10,2%-%date:~-7,2%.json
+```
+
+## Restore from Backup
+
+You got a new laptop. Or your hard drive died. Or you accidentally deleted your stories. Time to restore from backup.
+
+### Full Restore (Replace Everything)
+
+```bash
+# This will replace all your current repr data
+repr data restore ~/backups/repr-backup-2026-01-05.json --replace
+```
+
+Output:
+```text
+Restoring from backup...
+
+⚠ This will replace all current data
+⚠ Current stories: 12 files will be deleted
+⚠ Backup contains: 45 files
+
+Continue? [y/N] y
+
+✓ Restored 45 stories
+✓ Restored 3 profiles
+✓ Restored config
+✓ Restored queue (8 pending commits)
+
+Restore complete.
+```
+
+Everything is back.
+
+### Merge Restore (Keep Both)
+
+Already have some stories on the new machine? Want to merge with your backup?
+
+```bash
+repr data restore ~/backups/repr-backup-2026-01-05.json --merge
+```
+
+Output:
+```text
+Restoring from backup (merge mode)...
+
+Current stories: 12
+Backup stories: 45
+
+Merging:
+  • 33 new stories will be added
+  • 12 existing stories will be kept
+  • 0 conflicts (no duplicates found)
+
+✓ Merged 45 stories from backup
+✓ Total stories: 45 (12 existing + 33 new)
+
+Merge complete.
+```
+
+Now you have stories from both the backup and your local machine.
+
+## Migrating to a New Computer
+
+Full workflow for setting up repr on a new machine with all your existing data.
+
+<Steps>
+  <Step title="Install repr on new machine">
+    ```bash
+    brew install repr
+    # Or: pipx install repr-cli
+    ```
+  </Step>
+
+  <Step title="Copy your backup to the new machine">
+    Transfer your backup file (via USB, cloud storage, etc):
+
+    ```bash
+    # Example: download from Dropbox
+    cp ~/Dropbox/repr-backup.json ~/Downloads/
+    ```
+  </Step>
+
+  <Step title="Restore from backup">
+    ```bash
+    repr data restore ~/Downloads/repr-backup.json --replace
+    ```
+
+    Your stories, config, and settings are now on the new machine.
+  </Step>
+
+  <Step title="Initialize with your new repos">
+    Point repr at your code folder on the new machine:
+
+    ```bash
+    repr init ~/code
+    ```
+
+    This scans for repos. The repos don't have to match your old machine—repr works with whatever you have locally.
+  </Step>
+
+  <Step title="(Optional) Re-authenticate">
+    If you use cloud sync:
+
+    ```bash
+    repr login
+    ```
+
+    This connects the new machine to your account. Your auth token is **not** in the backup (it's in your OS keychain), so you'll need to log in again.
+  </Step>
+
+  <Step title="Verify everything works">
+    ```bash
+    repr stories
+    repr doctor
+    ```
+
+    Check that all your stories are there and repr is healthy.
+  </Step>
+</Steps>
+
+## Incremental Backups
+
+Don't want to back up everything every time? Use incremental backups:
+
+```bash
+# Backup only stories created since last backup
+repr data backup --output backup-incremental.json --since "1 week ago"
+```
+
+This creates a smaller backup with just recent work. Combine with periodic full backups:
+
+- **Weekly**: Incremental backup (fast, small)
+- **Monthly**: Full backup (slower, complete)
+
+## Checking What You Have
+
+Want to see how much data you're storing before backing up?
+
+```bash
+repr data
+```
+
+Output:
+```text
+Local Data Storage
+
+Stories:
+  Count: 45 files
+  Size: 2.1 MB
+  Location: ~/.repr/stories
+
+Profiles:
+  Count: 3 files
+  Size: 340 KB  
+  Location: ~/.repr/profiles
+
+Cache:
+  Size: 120 KB
+  Location: ~/.repr/cache
+
+Config:
+  Size: 8 KB
+  Location: ~/.repr/config.json
+
+Queue:
+  Pending commits: 23
+  Size: 45 KB
+  Location: ~/.repr/queue
+
+Total: 2.6 MB
+```
+
+Not much! Your stories are text files, so they don't take up much space.
+
+## Housekeeping
+
+### Clear Cache (Keeps Stories)
+
+Repr caches some data for performance. You can safely clear it:
+
+```bash
+repr data clear-cache
+```
+
+Your stories are untouched. Only temp files are removed.
+
+### Export Individual Stories
+
+Want to back up just one important story?
+
+```bash
+# View the story
+repr story view 01ARYZ6S41TSV4RRFFQ69G5FAV
+
+# Export as markdown
+repr story view 01ARYZ6S41TSV4RRFFQ69G5FAV --format md > important-story.md
+
+# Or copy the raw JSON
+cp ~/.repr/stories/01ARYZ6S41TSV4RRFFQ69G5FAV.json ~/backup/
+```
+
+## Backup Best Practices
+
+### 1. Backup Before Major Changes
+
+Before doing anything destructive:
+
+```bash
+repr data backup --output ~/temp-backup.json
+```
+
+Then make your changes. If something breaks, restore from `~/temp-backup.json`.
+
+### 2. Keep Multiple Backups
+
+Don't overwrite the same backup file. Use dated filenames:
+
+```bash
+repr data backup --output ~/backups/repr-$(date +%Y-%m-%d).json
+```
+
+This way you have history. If you realize you need something from 2 weeks ago, you have it.
+
+### 3. Test Your Backups
+
+Occasionally verify your backup actually works:
+
+```bash
+# Create a test directory
+mkdir ~/test-restore
+cd ~/test-restore
+
+# Restore to a temp location
+repr data restore ~/backups/repr-backup.json --output ./test
+
+# Verify stories are there
+ls -la ./test/stories/
+```
+
+A backup you haven't tested is not a backup.
+
+### 4. Use Cloud Sync as Secondary Backup
+
+If you use repr's cloud sync, your stories are already backed up to repr.dev. But don't rely on this alone—also keep local backups.
+
+Cloud sync is great for:
+- ✅ Multi-device access
+- ✅ Automatic synchronization
+- ✅ Secondary backup
+
+But local backups are better for:
+- ✅ Complete control
+- ✅ Offline access
+- ✅ No dependency on repr.dev being online
+
+Use both.
+
+## Disaster Recovery
+
+Your hard drive crashed. Everything is gone. What do you do?
+
+### If You Have Cloud Sync
+
+```bash
+# Install repr on new machine
+brew install repr
+
+# Login with your account
+repr login
+
+# Pull all stories from cloud
+repr sync
+```
+
+You're back up and running. This is why cloud sync is valuable even if you primarily work offline.
+
+### If You Only Have Local Backups
+
+```bash
+# Install repr
+brew install repr
+
+# Restore from your most recent backup
+repr data restore ~/Dropbox/repr-backup-2026-01-05.json --replace
+```
+
+All your stories are back.
+
+### If You Have Neither
+
+This is bad. Your stories are gone. But your git history still exists! You can regenerate:
+
+```bash
+# Initialize repr
+repr init ~/code
+
+# Regenerate stories from scratch
+repr generate --since "6 months ago" --local
+```
+
+You'll get new stories based on your git history. They won't be exactly the same as before (LLMs are non-deterministic), but you'll recover most of your work.
+
+This is why backups matter.
+
+## Migration Checklist
+
+Moving to a new machine? Follow this checklist:
+
+- [ ] Create fresh backup on old machine: `repr data backup`
+- [ ] Transfer backup file to new machine (USB, cloud, etc)
+- [ ] Install repr on new machine
+- [ ] Restore from backup: `repr data restore --replace`
+- [ ] Initialize with new repos: `repr init ~/code`
+- [ ] (Optional) Re-authenticate: `repr login`
+- [ ] Verify: `repr stories` and `repr doctor`
+- [ ] Test generate: `repr generate --local`
+- [ ] Set up new automated backup schedule
+
+## The Bottom Line
+
+Repr stores everything as human-readable JSON files in `~/.repr/`. You can back them up like any other files. But using `repr data backup` is easier because:
+
+1. It bundles everything into one file
+2. It's guaranteed to capture the right structure
+3. It's designed to work with `repr data restore`
+
+Back up regularly. You'll thank yourself later.
+

@@ -1,0 +1,42 @@
+---
+title: Profiles
+description: "Manage your developer profile"
+icon: "user"
+---
+
+Your profile is a collection of your stories, along with some basic biographical information.
+
+## Profile Fields
+
+You can set these fields using the CLI:
+
+```bash
+repr profile set-bio "Backend developer @ Acme"
+repr profile set-location "New York"
+repr profile set-available true
+```
+
+## Exporting Profiles
+
+You can export your entire profile (including all stories) to different formats. This is useful for:
+- Creating a backup
+- Generating a resume
+- sending a report to a manager
+
+```bash
+# Markdown
+repr profile export --format md > profile.md
+
+# JSON (Raw data)
+repr profile export --format json > profile.json
+```
+
+## Public Profile
+
+If you choose to publish, your profile will be hosted at `https://repr.dev/@yourusername`.
+
+To see your link:
+```bash
+repr profile link
+```
+

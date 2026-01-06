@@ -1,0 +1,43 @@
+---
+title: repr llm
+description: "Configure Language Models"
+icon: "brain"
+---
+
+Configure which LLM provider repr uses.
+
+## Usage
+
+```bash
+repr llm [ACTION]
+```
+
+## Actions
+
+### `configure`
+Interactive wizard to set up a local LLM (Ollama) or custom endpoint.
+```bash
+repr llm configure
+```
+
+### `test`
+Test the connection to the currently configured LLM.
+```bash
+repr llm test
+```
+
+### `add`
+Add a BYOK (Bring Your Own Key) provider. Your key is stored in the OS keychain.
+```bash
+repr llm add openai
+repr llm add anthropic
+```
+
+### `use`
+Set the default generation mode.
+```bash
+repr llm use local
+repr llm use cloud
+repr llm use byok:openai
+```
+

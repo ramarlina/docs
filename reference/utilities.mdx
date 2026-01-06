@@ -1,0 +1,36 @@
+---
+title: Utilities
+description: "Status, doctor, and diagnostics"
+icon: "wrench"
+---
+
+Helper commands for troubleshooting and maintenance.
+
+## Usage
+
+### `repr status`
+Show the overall health of the system:
+- Auth status
+- Tracked repo count
+- Story count
+- Unpushed changes
+
+### `repr mode`
+Show the current execution mode (Local/Cloud/BYOK) and privacy locks.
+
+### `repr doctor`
+Run a comprehensive diagnostic check. Checks for:
+- Config validity
+- Story integrity
+- LLM connectivity
+- Git version
+- Repo accessibility
+
+### `repr data`
+Manage local data storage.
+
+**Subcommands:**
+- `backup`: Create a full JSON backup of all local data.
+- `restore`: Restore from a backup file.
+- `clear-cache`: Free up disk space by clearing temporary cache.
+

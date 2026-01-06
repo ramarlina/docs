@@ -1,0 +1,49 @@
+---
+title: Installation
+description: "Install repr on macOS, Linux, and Windows"
+icon: "download"
+---
+
+## macOS & Linux (Homebrew)
+
+The recommended way to install on macOS and Linux is via Homebrew.
+
+```bash
+brew tap repr-app/tap
+brew install repr
+```
+
+To update to the latest version:
+
+```bash
+brew upgrade repr
+```
+
+## Python (Cross-platform)
+
+If you have Python 3.10+ installed, you can use `pipx` (recommended) or `pip`.
+
+```bash
+pipx install repr-cli
+```
+
+## Direct Download
+
+You can download pre-built binaries for macOS, Linux, and Windows from our releases page.
+
+<Card
+  title="Download from GitHub Releases"
+  icon="github"
+  href="https://github.com/repr-app/cli/releases/latest"
+>
+  Get binaries for macOS, Linux, and Windows.
+</Card>
+
+## Verify Installation
+
+Check that `repr` is installed correctly by running:
+
+```bash
+repr --version
+```
+

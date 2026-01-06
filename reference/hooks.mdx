@@ -1,0 +1,45 @@
+---
+title: repr hooks
+description: "Manage git hooks for automatic tracking"
+icon: "anchor"
+---
+
+Repr uses git `post-commit` hooks to automatically queue commits for generation.
+
+## Usage
+
+```bash
+repr hooks [ACTION] [OPTIONS]
+```
+
+## Actions
+
+### `install`
+Install the hook script in `.git/hooks/post-commit`.
+
+**Options:**
+- `--all`: Install in all tracked repositories.
+- `--repo <path>`: Install in a specific repository.
+
+```bash
+repr hooks install --all
+```
+
+### `remove`
+Remove the hook script.
+
+**Options:**
+- `--all`: Remove from all tracked repositories.
+- `--repo <path>`: Remove from a specific repository.
+
+```bash
+repr hooks remove --all
+```
+
+### `status`
+Check which repositories have hooks installed and how many commits are queued.
+
+```bash
+repr hooks status
+```
+

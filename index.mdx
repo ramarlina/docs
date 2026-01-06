@@ -1,97 +1,169 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: Introduction
+description: "Turn your git history into professional narratives"
+icon: "rocket"
 ---
 
-## Setting up
+<img
+  className="block dark:hidden"
+  src="/images/hero-light.png"
+  alt="Hero Light"
+/>
+<img
+  className="hidden dark:block"
+  src="/images/hero-dark.png"
+  alt="Hero Dark"
+/>
 
-Get your documentation site up and running in minutes.
+**repr** is a local-first developer tool that reads your git commits and turns them into professional narratives. Think of it as a personal archivist for your work—automatically capturing what you build, so you never have to remember (or recreate) your accomplishments.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
+<CardGroup cols={3}>
+  <Card title="Local-First" icon="lock">
+    Your code, diffs, and stories stay on your machine. Zero data leaves without explicit permission.
+  </Card>
+  <Card title="BYO Model" icon="robot">
+    Use local LLMs (Ollama) or your own API keys (OpenAI, Anthropic, etc). Your choice.
+  </Card>
+  <Card title="Opt-in Cloud" icon="cloud">
+    Sync across devices and publish your profile only when you choose to.
+  </Card>
+</CardGroup>
+
+## Real Developers, Real Stories
+
+### "I used repr to prep for my Meta interview in 30 minutes"
+
+> I had a final round coming up. They always ask 'tell me about a time you solved a complex problem.' I knew I had good examples buried in my git history, but I couldn't remember specifics.
 >
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
-  </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
-  </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
-
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
+> Ran `repr generate --template interview` and got 8 perfect STAR-format stories with actual metrics from my code. Featured my top 3, exported to markdown, reviewed them the morning of my interview. Nailed every behavioral question.
 >
-  Browse our showcase of exceptional documentation sites.
-</Card>
+> **— Sarah, Senior Backend Engineer**
+
+[See how to prep for interviews →](/guides/interview-prep)
+
+### "Our sprint demos went from chaos to polished in 5 minutes"
+
+> Every two weeks, our PM would ask 'what did the team ship?' and we'd scramble to remember. Now I just run `repr since "2 weeks ago"` on Friday afternoon and export it as our sprint summary.
+>
+> Added/Changed/Fixed format. Real commit data. No one has to remember what they did. Our stakeholders love it.
+>
+> **— Marcus, Engineering Manager**
+
+[See team workflows →](/guides/team-workflows)
+
+### "I run repr in a fully air-gapped environment"
+
+> Work in defense. Code can't leave the building. Set up repr with Ollama, locked to local-only mode. Now I can still generate stories for my annual review without ever touching the network.
+>
+> Privacy audit shows zero external calls. It's the only tool I trust for this.
+>
+> **— Alex, Security Engineer**
+
+[See privacy-first setup →](/guides/local-only)
+
+### "My weekly 1-on-1s with my manager are 10x better"
+
+> I used to show up with vague 'I worked on some bug fixes.' Now I run `repr week` before every 1-on-1. I have specific examples of what I shipped, with context.
+>
+> My manager started using my exports for *her* updates to her boss. Got promoted 6 months later.
+>
+> **— Jamie, Frontend Developer**
+
+[See weekly reflection →](/guides/weekly-reflection)
+
+## Why use repr?
+
+- **Automated Standups**: Forget what you did yesterday? `repr standup` has your back.
+- **Performance Reviews**: Generate a 3-month summary of your impact with one command.
+- **Interview Prep**: Turn your actual code contributions into STAR-format stories.
+- **Sprint Demos**: Export professional changelogs for stakeholders in seconds.
+- **Privacy Control**: Use entirely offline with local models for sensitive work.
+
+## How It Works
+
+1. **Scan your repos** — Point repr at your code directory
+2. **Install hooks (optional)** — Auto-capture commits as you work
+3. **Generate stories** — LLM reads your commits and creates narratives
+4. **Review and curate** — Polish, feature, or hide stories as needed
+5. **(Optional) Publish** — Share your profile on repr.dev or keep it private
+
+Everything happens locally by default. You control what (if anything) gets shared.
+
+## Getting Started
+
+<CardGroup cols={2}>
+  <Card
+    title="Quickstart"
+    icon="bolt"
+    href="/quickstart"
+  >
+    Get up and running in less than 60 seconds.
+  </Card>
+  <Card
+    title="Installation"
+    icon="download"
+    href="/installation"
+  >
+    Install on macOS, Linux, or Windows.
+  </Card>
+</CardGroup>
+
+## Popular Guides
+
+<CardGroup cols={2}>
+  <Card
+    title="Daily Workflow"
+    icon="calendar"
+    href="/guides/daily-usage"
+  >
+    Set up hooks and let repr track automatically.
+  </Card>
+  <Card
+    title="Interview Prep"
+    icon="briefcase"
+    href="/guides/interview-prep"
+  >
+    Generate STAR-format stories for behavioral interviews.
+  </Card>
+  <Card
+    title="Privacy First"
+    icon="shield-check"
+    href="/guides/local-only"
+  >
+    Configure repr for maximum privacy and offline use.
+  </Card>
+  <Card
+    title="Team Workflows"
+    icon="users"
+    href="/guides/team-workflows"
+  >
+    Use repr for sprint reviews, retros, and team updates.
+  </Card>
+</CardGroup>
+
+## Quick Commands
+
+Once installed, these are the commands you'll use most:
+
+```bash
+# First-time setup
+repr init ~/code
+repr generate --local
+
+# Daily use
+repr standup                      # Last 3 days
+repr week                         # Last 7 days
+repr generate --local             # Turn commits into stories
+
+# Interview prep
+repr generate --template interview
+repr story feature <id>           # Pin your best work
+
+# Publishing (optional)
+repr login
+repr push --all
+repr profile link                 # Get your public URL
+```
+
+[See the full command reference →](/reference/cheatsheet)
+

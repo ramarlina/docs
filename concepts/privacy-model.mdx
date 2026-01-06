@@ -1,0 +1,47 @@
+---
+title: Privacy Model
+description: "Understanding how repr protects your data"
+icon: "shield"
+---
+
+Repr is built on a **Local-First** architecture. This means your data lives on your machine by default, and you have complete control over when (and if) it leaves.
+
+## Data Boundaries
+
+| Data Type | Local Storage | Cloud Storage | Condition |
+|-----------|---------------|---------------|-----------|
+| **Source Code** | Yes (in your repos) | **Never** | Repr never uploads your code. |
+| **Commit Diffs** | Yes (temporary analysis) | **Never*** | Only sent to LLM for processing, then discarded. |
+| **Stories** | Yes (`~/.repr/stories`) | Optional | Only if you run `repr push`. |
+| **Profile** | Yes (`~/.repr/config`) | Optional | Only if you run `repr push`. |
+| **API Keys** | Yes (OS Keychain) | **Never** | Keys never leave your device. |
+
+<Note>
+*If you use `repr generate --cloud`, diffs are sent to repr's stateless processing pipeline. They are not stored. If you use `--local`, diffs never leave your machine.
+</Note>
+
+## Modes
+
+### 1. Local-Only Mode
+- **Network**: Blocked.
+- **LLM**: Local (Ollama) only.
+- **Sync**: Disabled.
+
+### 2. BYOK (Bring Your Own Key) Mode
+- **Network**: Only to your LLM provider (e.g., `api.openai.com`).
+- **LLM**: Your API key.
+- **Sync**: Disabled (unless you login).
+
+### 3. Cloud Mode
+- **Network**: Connected to `repr.dev`.
+- **LLM**: Managed by repr.
+- **Sync**: Enabled.
+
+## Auditing
+
+You can see a log of every network request repr has made to the cloud:
+
+```bash
+repr privacy audit
+```
+

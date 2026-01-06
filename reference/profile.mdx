@@ -1,0 +1,40 @@
+---
+title: repr profile
+description: "Profile management and export"
+icon: "id-card"
+---
+
+Manage your developer profile settings and export your data.
+
+## Usage
+
+```bash
+repr profile [ACTION]
+```
+
+## Actions
+
+### `set-bio` / `set-location` / `set-available`
+Update profile metadata.
+```bash
+repr profile set-bio "Rust enthusiast"
+```
+
+### `export`
+Export your profile and stories.
+
+**Options:**
+- `--format <fmt>`: `md` (markdown) or `json`.
+- `--since <date>`: Filter stories by date.
+- `--output <file>`: Write to file instead of stdout.
+
+```bash
+repr profile export --format md > resume.md
+```
+
+### `link`
+Get your public profile URL (if signed in).
+```bash
+repr profile link
+```
+

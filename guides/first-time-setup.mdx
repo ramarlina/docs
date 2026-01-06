@@ -1,0 +1,150 @@
+---
+title: Getting Started with repr
+description: "Scan your repos and generate your first stories"
+icon: "rocket"
+---
+
+You've been shipping code for weeks (months? years?), but when someone asks "what have you been working on lately?"—you draw a blank. You know you built *something* important, but the details are fuzzy.
+
+That's where repr comes in. It reads your git history and turns your commits into professional narratives. Here's how to get your first stories generated in about 5 minutes.
+
+## What You'll Need
+
+- The repr CLI installed (see [Installation](/installation) if you haven't yet)
+- A folder with some git repositories (like `~/code` or `~/projects`)
+- (Optional) [Ollama](https://ollama.com) running locally if you want 100% offline generation
+
+Let's go.
+
+<Steps>
+  <Step title="Scan your repos">
+    Point repr at your code directory and let it discover what you've been working on.
+
+    ```bash
+    repr init ~/code
+    ```
+
+    Repr will scan for git repositories and show you what it found:
+    
+    ```text
+    Found 12 repositories
+    ✓ myproject (143 commits) [Python]
+    ✓ frontend-app (87 commits) [TypeScript]
+    ✓ api-gateway (56 commits) [Go]
+    ✓ docs-site (22 commits) [Markdown]
+    ...
+    
+    Track these repositories? [Y/n]
+    ```
+
+    Hit enter to confirm. Your repos are now tracked, but **nothing has left your machine yet**—this is all local.
+  </Step>
+
+  <Step title="Take a quick look around">
+    Before generating anything, let's see what you've been up to this week.
+
+    ```bash
+    repr week
+    ```
+
+    You'll get a quick summary like:
+
+    ```text
+    📊 Last 7 days across 4 repositories
+
+    myproject (12 commits):
+      • Add OAuth2 integration
+      • Implement Redis caching
+      • Fix race condition in auth flow
+    
+    frontend-app (8 commits):
+      • Redesign settings page
+      • Add dark mode toggle
+    
+    Total: 20 commits, 8 files changed
+    ```
+
+    This is just a preview—nothing saved yet. But it gives you a sense of what repr will work with.
+  </Step>
+
+  <Step title="Generate your first stories">
+    Now for the magic. Let's turn those commits into professional narratives.
+
+    ```bash
+    repr generate --local
+    ```
+
+    <Tip>
+      If you don't have a local LLM installed, repr will guide you through setting up Ollama or adding an API key (OpenAI, Anthropic, etc). Your choice.
+    </Tip>
+
+    You'll see repr processing your work:
+
+    ```text
+    Generating stories (local LLM: llama3.2)...
+    
+    myproject
+      • Built OAuth2 integration with Google and GitHub providers
+      • Implemented Redis caching layer for session management
+      • Fixed race condition in user authentication flow
+    
+    frontend-app
+      • Redesigned settings page with improved UX
+      • Added dark mode toggle with system preference detection
+    
+    Generated 5 stories
+    Stories saved to: ~/.repr/stories
+    ```
+
+    That's it. You've got professional summaries of your work, stored locally as JSON files.
+  </Step>
+
+  <Step title="Check out your stories">
+    See what got generated.
+
+    ```bash
+    repr stories
+    ```
+
+    You'll get a list with IDs, dates, and titles:
+
+    ```text
+    01JAXK... Built OAuth2 integration with Google/GitHub    Jan 5, 2026
+    01JAXL... Implemented Redis caching for sessions          Jan 5, 2026
+    01JAXM... Fixed race condition in auth flow               Jan 4, 2026
+    01JAXN... Redesigned settings page with improved UX       Jan 3, 2026
+    01JAXO... Added dark mode with system detection           Jan 2, 2026
+    ```
+
+    Want to see the full story? Pick an ID and view it:
+
+    ```bash
+    repr story view 01JAXK...
+    ```
+
+    You'll see a markdown-formatted story with context, technologies used, and impact.
+  </Step>
+</Steps>
+
+## What Just Happened?
+
+You just turned your messy git history into clean, professional narratives. Here's what repr did:
+
+1. **Scanned your commits** - Read commit messages, diffs, and file changes
+2. **Grouped related work** - Identified logical units (features, fixes, refactors)
+3. **Generated context** - Used an LLM to write professional summaries
+4. **Saved locally** - Everything lives in `~/.repr/stories` on your machine
+
+**Nothing was uploaded anywhere.** Your code stays on your machine. The only network call was to your local LLM (if you used `--local`) or to your API provider (if you used your own key).
+
+## What's Next?
+
+Now that you've got stories, here's what you can do:
+
+- **Automate it**: Set up [Daily Usage](/guides/daily-usage) with git hooks so stories generate automatically
+- **Customize it**: [Configure different LLMs](/configuration/llm-setup) or templates for different use cases
+- **Share it**: (Optional) [Publish your profile](/guides/publishing) to repr.dev to showcase your work
+- **Review weekly**: Use [Weekly Reflection](/guides/weekly-reflection) to curate and export summaries
+
+The power move? Set up git hooks and let repr track everything automatically. Then, once a week, review and publish your best work. Five minutes a week to maintain a living portfolio of what you've actually built.
+

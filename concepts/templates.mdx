@@ -1,0 +1,38 @@
+---
+title: Templates
+description: "Control the voice and format of your stories"
+icon: "copy"
+---
+
+Templates determine how the LLM writes your story. Repr comes with several built-in templates designed for different audiences.
+
+## Built-in Templates
+
+### `resume` (Default)
+Focuses on **impact** and **action verbs**. Great for portfolios and performance reviews.
+- **Style**: Professional, concise, results-oriented.
+- **Example**: "Optimized database query performance by 40%..."
+
+### `changelog`
+Focuses on **technical details**. Good for release notes.
+- **Style**: Bullet points, grouped by Added/Changed/Fixed.
+- **Example**: "Fixed race condition in user session handling."
+
+### `narrative`
+Focuses on the **journey**. Good for blog posts or detailed engineering logs.
+- **Style**: Paragraphs, storytelling, problem-solving context.
+- **Example**: "We started by identifying a bottleneck in the rendering pipeline..."
+
+### `interview`
+Focuses on the **STAR method** (Situation, Task, Action, Result).
+- **Style**: Structured sections, highlighting personal contribution.
+- **Example**: "**Situation:** API latency was high. **Action:** Implemented caching..."
+
+## Usage
+
+Specify a template during generation:
+
+```bash
+repr generate --template interview
+```
+

@@ -1,0 +1,237 @@
+---
+title: Interview Preparation
+description: "Generate STAR-format stories for behavioral interviews"
+icon: "briefcase"
+---
+
+You've got a big interview coming up. You know they're going to ask behavioral questions like "Tell me about a time you solved a complex technical problem" or "Describe a situation where you had to make trade-offs."
+
+You *have* good stories. You know you do. But when you try to remember them on the spot? Brain fog.
+
+Here's the secret: **Your git history is full of interview stories.** You just need to extract them in the right format. That's where repr comes in.
+
+## The Interview Template
+
+Repr has a special template that formats your work in the **STAR method** (Situation, Task, Action, Result)—exactly what interviewers are trained to look for.
+
+Let's generate some.
+
+<Steps>
+  <Step title="Generate interview-ready stories">
+    Use the `interview` template to create STAR-formatted narratives:
+
+    ```bash
+    repr generate --template interview --local
+    ```
+
+    Repr will analyze your commits and structure them for behavioral interviews:
+
+    ```text
+    Generating interview stories (local LLM)...
+    
+    Processing commits with STAR format...
+    
+    myproject → 3 stories
+      • Built OAuth2 integration to improve authentication security
+      • Fixed critical race condition affecting 8% of users
+      • Implemented Redis caching reducing API latency by 40%
+    
+    ✓ Generated 3 interview stories
+    ✓ Formatted in STAR structure
+    ```
+  </Step>
+
+  <Step title="See what you got">
+    List your stories and pick one to review:
+
+    ```bash
+    repr stories
+    ```
+
+    Then view the full story:
+
+    ```bash
+    repr story view 01ARYZ6S41TSV4RRFFQ69G5FAV
+    ```
+
+    Here's what an interview-formatted story looks like:
+
+    ```markdown
+    **Situation:** The authentication system was experiencing race 
+    conditions under high load. About 8% of login attempts were 
+    failing intermittently, causing support tickets and user 
+    frustration. The issue was particularly bad during peak hours 
+    (9am-11am EST).
+
+    **Task:** I needed to identify the root cause of the failures, 
+    implement a fix without disrupting the existing session 
+    management system, and ensure the solution could handle 10x our 
+    current traffic.
+
+    **Action:** I used distributed tracing to identify that the race 
+    condition occurred during concurrent Redis operations when 
+    creating new sessions. I implemented distributed locking using 
+    Redis SETNX with proper timeout handling and exponential backoff 
+    for retries. I also added comprehensive monitoring and alerting 
+    so we'd catch similar issues faster in the future.
+
+    **Result:** Authentication failures dropped from 8% to less than 
+    0.1%. Average login latency improved by 20ms. We handled Black 
+    Friday traffic (5x normal load) with zero auth-related incidents. 
+    The monitoring system I added caught two other race conditions in 
+    unrelated systems within the next month.
+
+    Technologies: Python, Redis, OpenTelemetry, Datadog
+    ```
+
+    Notice how it's not just "what you did"—it's the **full narrative** with context, challenges, and measurable impact.
+  </Step>
+
+  <Step title="Polish with interview context">
+    The LLM got you 80% of the way there. Now add the details that will really sell it in an interview.
+
+    ```bash
+    repr story edit 01ARYZ6S41TSV4RRFFQ69G5FAV
+    ```
+
+    Add things like:
+    - **Team dynamics** - Did you work alone or collaborate?
+    - **Time pressure** - Was this a week-long project or a 2-day firefight?
+    - **Business impact** - What was at stake? Revenue? User trust?
+    - **Trade-offs** - What did you *not* do and why?
+    - **What you learned** - Interviewers love this
+
+    Example additions:
+    ```markdown
+    **Context:** This was a two-person effort—I handled the backend 
+    while Sarah worked on frontend error handling. We had 3 days 
+    before a major product launch.
+
+    **Trade-offs:** I considered switching to a distributed lock 
+    manager like etcd, but that would have added operational 
+    complexity. We chose to use Redis (already in our stack) with 
+    good monitoring instead.
+
+    **What I learned:** The importance of distributed tracing for 
+    debugging race conditions. Before this, I would have been stuck 
+    reading logs for days.
+    ```
+  </Step>
+
+  <Step title="Mark your strongest stories">
+    Some stories are just better than others. Feature your top 3-5:
+
+    ```bash
+    repr story feature 01ARYZ6S41TSV4RRFFQ69G5FAV
+    ```
+
+    These will show up first in your exports and on your profile.
+  </Step>
+
+  <Step title="Export your interview cheat sheet">
+    Create a markdown file you can review before interviews:
+
+    ```bash
+    repr profile export --format md > interview-prep.md
+    ```
+
+    Now you've got a document with 5-10 polished stories, all formatted perfectly for behavioral questions. Print it out, save it to your phone, or just review it the morning of your interview.
+  </Step>
+</Steps>
+
+## Pro Tips for Better Interview Stories
+
+### Focus on Impact and Leadership
+
+Tell repr what kind of stories you want:
+
+```bash
+repr generate --template interview --prompt "Focus on leadership, technical decision-making, and cross-team collaboration"
+```
+
+The custom prompt guides the LLM to emphasize those aspects in your stories.
+
+### Filter by Technology Stack
+
+Applying to a Python role? Generate stories that highlight Python work:
+
+```bash
+# Generate stories from your Python repos
+repr repos list | grep python
+repr generate --repo ~/code/python-api --template interview
+
+# Or filter after generation
+repr stories --json | jq '.[] | select(.technologies | contains(["Python"]))'
+```
+
+### Target Your Most Impressive Projects
+
+Don't generate from *everything*. Pick your 2-3 best repos:
+
+```bash
+repr generate --repo ~/code/complex-distributed-system --template interview
+repr generate --repo ~/code/high-traffic-api --template interview
+```
+
+Quality over quantity. Five great stories beat twenty mediocre ones.
+
+### Practice the STAR Format
+
+Once you have your stories, **actually practice saying them out loud**. The STAR format gives you the structure, but you need to be able to deliver it naturally.
+
+Time yourself. A good STAR story takes 90-120 seconds to tell. If you're going over 2 minutes, you're giving too much detail. Under 60 seconds? Add more context.
+
+## Common Interview Questions & Your Stories
+
+Here's how to map your repr stories to common behavioral questions:
+
+| Interview Question | Story Type to Use |
+|-------------------|-------------------|
+| "Tell me about a technical challenge you overcame" | Any story with **Action** focused on problem-solving |
+| "Describe a time you had to make trade-offs" | Stories where you mention **alternatives considered** |
+| "How do you handle tight deadlines?" | Stories with **time pressure** in the Situation |
+| "Tell me about a project you're proud of" | Your **featured stories** with strong Results |
+| "Describe a time you failed" | Look for stories with **challenges** or **what you learned** |
+| "How do you collaborate with other teams?" | Stories mentioning **collaboration** in Action |
+
+The beauty of having 10+ stories ready? You can pick the perfect one for each question instead of scrambling to remember *something*.
+
+## The Week Before Your Interview
+
+Run this workflow:
+
+```bash
+# Generate fresh stories
+repr generate --template interview --local
+
+# Review what you have
+repr stories
+
+# Feature your top 5
+repr story feature <id>
+repr story feature <id>
+repr story feature <id>
+repr story feature <id>
+repr story feature <id>
+
+# Export to markdown
+repr profile export --format md > interview-stories.md
+
+# Export to JSON (easier to search)
+repr profile export --format json > stories.json
+```
+
+Then spend 30 minutes reviewing your stories. Practice telling 2-3 of them out loud. You're ready.
+
+## Real Talk: This Works
+
+A good STAR story demonstrates:
+- ✅ **Technical depth** (your Action shows you know your craft)
+- ✅ **Business awareness** (your Result shows you think about impact)
+- ✅ **Communication** (your Situation sets context for non-technical interviewers)
+- ✅ **Self-awareness** (your Task shows you understand the problem)
+
+Repr gives you the raw material. You add the polish. Together, you've got stories that stand out.
+
+The alternative? Wing it and hope you remember something good under pressure. Don't do that. Generate your stories now, while the work is fresh. Future interview-you will thank you.
+

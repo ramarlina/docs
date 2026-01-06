@@ -1,0 +1,356 @@
+---
+title: Multi-Device Sync
+description: "Keep stories synchronized across computers"
+icon: "laptop-mobile"
+---
+
+You code on your work laptop during the day. You hack on side projects from your desktop at home. You occasionally use your old MacBook when traveling.
+
+Problem: Your repr stories are scattered across three machines. You can't remember which computer has which stories.
+
+Solution: **Multi-device sync**. Sign in to the same account on all your devices, and repr keeps everything synchronized via the cloud.
+
+## The Setup: Adding a New Device
+
+Let's say you've been using repr on your work laptop. Now you want to add your home desktop.
+
+<Steps>
+  <Step title="Install repr on the new device">
+    Same as always:
+
+    ```bash
+    # macOS/Linux
+    brew install repr
+
+    # Or Python
+    pipx install repr-cli
+    ```
+  </Step>
+
+  <Step title="Initialize with your local repos">
+    Point repr at your code folder:
+
+    ```bash
+    repr init ~/code
+    ```
+
+    This scans for git repositories on this machine. They don't have to be the same repos as your other device—repr is smart about merging stories from different repos.
+
+    ```text
+    Found 8 repositories
+    ✓ side-project (87 commits) [TypeScript]
+    ✓ personal-blog (34 commits) [Markdown]
+    ✓ home-automation (56 commits) [Python]
+    ...
+    
+    Track these repositories? [Y/n]
+    ```
+  </Step>
+
+  <Step title="Sign in with your existing account">
+    Use the **same account** you use on your other device:
+
+    ```bash
+    repr login
+    ```
+
+    This opens your browser for device flow authentication (no password in the terminal). Sign in, and you're connected.
+
+    ```text
+    Opening browser for authentication...
+    
+    ✓ Successfully authenticated as you@example.com
+    ✓ Detected existing account with 23 stories
+    ```
+  </Step>
+
+  <Step title="Pull your existing stories">
+    Download all the stories from your other device(s):
+
+    ```bash
+    repr sync
+    ```
+
+    Output:
+    ```text
+    Syncing with repr.dev...
+    
+    ↓ Pulling remote changes
+      • 23 stories from work-laptop
+      • 5 stories from old-macbook
+    
+    ↑ Pushing local changes
+      • 0 new stories (none generated yet on this device)
+    
+    ✓ Sync complete
+    ✓ You now have 28 total stories across all devices
+    ```
+
+    Now your home desktop has all the stories you generated on your work laptop. Magic.
+  </Step>
+</Steps>
+
+## The Daily Workflow: Staying in Sync
+
+Once all your devices are connected to the same account, here's how to keep them synchronized.
+
+### Option 1: Manual Sync (Recommended)
+
+Start your day by pulling the latest:
+
+```bash
+repr pull
+```
+
+Do your work. Generate stories. When you're done for the day:
+
+```bash
+repr push
+```
+
+Or do both at once:
+
+```bash
+repr sync
+```
+
+Output:
+```text
+Syncing with repr.dev...
+
+↓ Pulling remote changes
+  • 3 new stories from work-laptop (generated yesterday)
+  
+↑ Pushing local changes  
+  • 5 new stories from home-desktop (generated today)
+
+✓ All stories synced
+✓ Total: 36 stories across all devices
+```
+
+### Option 2: Automatic Sync with Git Hooks
+
+You can hook repr sync into your git workflow. Add this to your shell config:
+
+```bash
+# In ~/.zshrc or ~/.bashrc
+alias gpp='git pull && repr pull'
+alias gps='git push && repr push'
+```
+
+Now when you pull/push code, your stories sync too. Convenient.
+
+### Option 3: Scheduled Sync (Advanced)
+
+Want it completely automatic? Add a cron job or launchd service:
+
+```bash
+# Sync every hour (macOS with launchd)
+repr hooks install-sync --schedule hourly
+
+# Or manually with cron
+0 * * * * /usr/local/bin/repr sync --quiet
+```
+
+Now your stories sync in the background. You don't have to think about it.
+
+## Handling Conflicts
+
+Repr is pretty smart about conflicts, but occasionally you'll edit the same story on two devices before syncing.
+
+### The Default Strategy: Last Write Wins
+
+If you edit story `01ABC...` on your laptop and the same story on your desktop, repr uses the **most recent** edit when you sync.
+
+You'll see a warning:
+
+```text
+⚠ Conflict detected: Story 01ABC... edited on multiple devices
+  Local version: 2026-01-05 14:32:00
+  Remote version: 2026-01-05 16:45:00
+  
+  Using remote version (newer)
+  Your local edits were backed up to ~/.repr/conflicts/
+```
+
+Your local version is saved to `~/.repr/conflicts/` just in case.
+
+### Check Sync Status
+
+Want to see what will happen before syncing?
+
+```bash
+repr status
+```
+
+Output:
+```text
+Repr Status
+
+Auth: ✓ Signed in as you@example.com
+Mode: Cloud (connected to repr.dev)
+
+Tracked repos: 8
+Total stories: 36
+
+Sync status:
+  ↓ 2 remote stories to pull
+  ↑ 3 local stories to push
+  ⚠ 1 conflict to resolve
+
+Run 'repr sync' to synchronize
+Run 'repr push --dry-run' to preview changes
+```
+
+### Preview Before Pushing
+
+Always a good idea:
+
+```bash
+repr push --dry-run
+```
+
+Output:
+```text
+Preview: Push to repr.dev
+
+Stories to upload:
+  • Built OAuth2 integration (01ABC...)
+  • Implemented Redis caching (01DEF...)  
+  • Fixed auth race condition (01GHI...)
+
+These will be available on all your devices after sync.
+
+Run without --dry-run to push
+```
+
+## Multiple Repos Across Devices
+
+Here's where it gets really powerful: **You don't need the same repos on all devices.**
+
+Work laptop tracks:
+- `~/work/api-service`
+- `~/work/frontend-app`
+- `~/work/infrastructure`
+
+Home desktop tracks:
+- `~/code/side-project`
+- `~/code/open-source-contribution`
+- `~/code/personal-site`
+
+When you sync, repr merges stories from **all repos across all devices**. Your profile becomes a complete picture of everything you build, everywhere.
+
+## The Multi-Device Power Move
+
+Here's a workflow that really works:
+
+1. **Work laptop**: Set up hooks, generate stories automatically during the week
+2. **Friday afternoon**: Run `repr push` from your work laptop  
+3. **Weekend**: Pull to your home desktop with `repr pull`
+4. **Review and curate**: Polish stories, feature the best ones, export summaries
+5. **Sunday night**: Push curated stories back with `repr push`
+6. **Monday morning**: Pull to work laptop, your profile is polished and ready
+
+Your stories flow between devices. You generate on one, curate on another, publish from either.
+
+## Selective Sync (Advanced)
+
+Don't want to sync everything? You can be selective:
+
+```bash
+# Only push specific stories
+repr push --story 01ABC... --story 01DEF...
+
+# Only pull, don't push
+repr pull
+
+# Only push, don't pull  
+repr push
+
+# Sync everything
+repr sync
+```
+
+## Troubleshooting Sync Issues
+
+### "Auth token expired"
+
+Your login expired. Re-authenticate:
+
+```bash
+repr login
+```
+
+### "Conflict detected"
+
+You edited the same story on multiple devices. Check the conflict directory:
+
+```bash
+ls ~/.repr/conflicts/
+cat ~/.repr/conflicts/01ABC....json
+```
+
+Pick the version you want and manually restore it.
+
+### "Sync failed: Network error"
+
+Repr couldn't reach repr.dev. Check your connection:
+
+```bash
+repr doctor
+
+# Or test connection directly
+curl https://api.repr.dev/health
+```
+
+### "Stories out of sync"
+
+Force a full sync:
+
+```bash
+repr sync --force
+```
+
+This re-downloads everything from the cloud and reconciles local stories.
+
+## Privacy Note: What Gets Synced?
+
+Let's be clear about what syncing means:
+
+**What gets synced:**
+- ✅ Your generated stories (titles, narratives, metadata)
+- ✅ Story edits and curation (featured/hidden status)
+- ✅ Profile settings (bio, location, availability)
+
+**What doesn't get synced:**
+- ❌ Your source code (never)
+- ❌ Commit diffs (never)
+- ❌ Repository contents (never)
+- ❌ Git history (never)
+
+Syncing uploads your **stories** (the LLM-generated narratives), not your code.
+
+## When Multi-Device Sync Makes Sense
+
+**Good fit:**
+- You code on 2+ computers regularly
+- You want a unified view of all your work
+- You're comfortable with cloud sync
+
+**Not necessary if:**
+- You only code on one machine
+- You prefer full local-only mode
+- You manually export/import as needed
+
+Multi-device sync is optional. Repr works great on a single device too.
+
+## What's Next?
+
+Once you've got sync working:
+
+- **Weekly ritual**: Pull → Review → Feature → Push
+- **Publishing**: Your stories are already synced, just run `repr push --all` to make your profile public
+- **Backup**: Even with sync, run `repr data backup` occasionally for local backups
+
+Sync gives you flexibility. Work from anywhere, your stories follow you.
+

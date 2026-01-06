@@ -1,0 +1,41 @@
+---
+title: Config Reference
+description: "Configuration file options"
+icon: "gear"
+---
+
+Repr's configuration is stored in `~/.repr/config.json`. You can edit it manually or use the `repr config` command.
+
+## Editing Config
+
+```bash
+# Open in your default editor
+repr config edit
+
+# Set a value directly
+repr config set generation.batch_size 10
+```
+
+## Options
+
+### `llm`
+Settings for the Language Model.
+- `default`: (`local` | `cloud` | `byok:<provider>`)
+- `local_api_url`: URL for local LLM (default: `http://localhost:11434/v1`)
+- `local_model`: Model name (default: `llama3.2`)
+
+### `generation`
+- `batch_size`: Number of commits to group into one story (default: `5`).
+- `max_commits_per_batch`: Safety limit (default: `50`).
+- `template`: Default template to use (default: `resume`).
+
+### `profile`
+- `username`: Your handle on repr.dev.
+- `bio`: Profile bio.
+- `location`: Profile location.
+- `available`: Boolean, "Available for hire" status.
+
+### `privacy`
+- `lock_local_only`: Boolean. If true, blocks cloud features.
+- `telemetry_enabled`: Boolean. (Default: `false`).
+

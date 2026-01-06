@@ -1,0 +1,38 @@
+---
+title: Cloud Operations
+description: "Login, push, and sync"
+icon: "cloud"
+---
+
+Commands for interacting with the repr cloud service.
+
+## Usage
+
+### `repr login`
+Authenticate via browser.
+```bash
+repr login
+```
+
+### `repr logout`
+Sign out and clear local session.
+```bash
+repr logout
+```
+
+### `repr push`
+Upload stories to the cloud. By default, only new stories are pushed.
+
+**Options:**
+- `--dry-run`: See what would be pushed.
+- `--story <id>`: Push a single story.
+
+### `repr pull`
+Download stories from the cloud to your local machine.
+
+### `repr sync`
+Perform a bi-directional sync (push and pull).
+```bash
+repr sync
+```
+

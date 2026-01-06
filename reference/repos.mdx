@@ -1,0 +1,36 @@
+---
+title: repr repos
+description: "Manage tracked repositories"
+icon: "folder-tree"
+---
+
+Manage which git repositories repr is watching.
+
+## Usage
+
+```bash
+repr repos [ACTION] [PATH]
+```
+
+## Actions
+
+| Action | Description |
+|--------|-------------|
+| `list` | (Default) List all tracked repositories. |
+| `add <path>` | Add a repository to track. |
+| `remove <path>` | Stop tracking a repository. |
+| `pause <path>` | Temporarily stop tracking (keeps config). |
+| `resume <path>` | Resume tracking. |
+
+## Examples
+
+Add a new project:
+```bash
+repr repos add ~/code/new-project
+```
+
+Stop tracking a project:
+```bash
+repr repos remove ~/code/old-project
+```
+

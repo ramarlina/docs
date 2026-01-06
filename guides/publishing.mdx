@@ -1,0 +1,346 @@
+---
+title: Publishing Your Profile
+description: "Share your work with the world on repr.dev"
+icon: "globe"
+---
+
+You've been generating stories for a few weeks. You've got 20+ polished narratives about real work you've shipped. Now what?
+
+You could keep them private (totally valid). Or you could **publish them** and create a living portfolio that actually reflects what you build.
+
+Think of it as a developer portfolio that updates itself. No manual blog writing, no trying to remember what you did 6 months ago. Just your actual work, professionally summarized, ready to share.
+
+Here's how to publish to repr.dev.
+
+## When to Publish (And When Not To)
+
+**Reasons to publish:**
+- You're job hunting and want a portfolio beyond your resume
+- You want to build a public track record of your work
+- You're building in public and want to share progress
+- You want a shareable link for your LinkedIn, Twitter, or newsletter
+
+**Reasons to keep it private:**
+- You work on confidential or proprietary code
+- You're not comfortable with public profiles yet
+- Your employer has policies against sharing work details
+- You prefer repr as a personal journaling tool
+
+Both are totally valid. Repr works great either way.
+
+## The Publishing Flow
+
+<Steps>
+  <Step title="Sign in to repr.dev">
+    First, you need an account:
+
+    ```bash
+    repr login
+    ```
+
+    This opens your browser with a device flow login (no password in your terminal). Authenticate, and you're done.
+
+    ```text
+    Opening browser for authentication...
+    
+    ✓ Successfully authenticated as you@example.com
+    ✓ Token saved to system keychain
+    ```
+
+    Your auth token is stored in your OS keychain (same place your git credentials live), not in config files.
+  </Step>
+
+  <Step title="Set up your profile">
+    Add some context about yourself:
+
+    ```bash
+    # Your professional bio
+    repr profile set-bio "Full-stack engineer specializing in distributed systems and real-time infrastructure"
+
+    # Location (optional)
+    repr profile set-location "San Francisco, CA"
+
+    # Are you open to opportunities?
+    repr profile set-available true
+    ```
+
+    You can always change these later:
+
+    ```bash
+    repr profile set-available false  # No longer job hunting
+    ```
+  </Step>
+
+  <Step title="Curate what you'll share">
+    Not every story should be public. Take a minute to review:
+
+    ```bash
+    repr stories
+    ```
+
+    Hide anything sensitive (internal project names, proprietary features, etc):
+
+    ```bash
+    repr story hide 01SENSITIVE_STORY_ID
+    ```
+
+    Feature your best 3-5 stories so they appear at the top:
+
+    ```bash
+    repr story feature 01BEST_STORY_ID
+    repr story feature 01ANOTHER_GREAT_ONE
+    ```
+
+    Featured stories get pinned to the top of your profile and show up first when someone visits.
+  </Step>
+
+  <Step title="Preview before publishing">
+    Always good to see what you're about to share:
+
+    ```bash
+    repr push --dry-run
+    ```
+
+    Output:
+    ```text
+    Preview: Publishing to repr.dev
+    
+    Profile:
+      Name: Your Name
+      Bio: Full-stack engineer specializing in distributed systems...
+      Location: San Francisco, CA
+      Available for work: Yes
+    
+    Stories (12 public, 3 hidden):
+      Featured:
+        • Built OAuth2 integration with Google/GitHub providers
+        • Implemented Redis caching reducing API latency by 40%
+        • Fixed critical race condition affecting 8% of users
+      
+      Recent:
+        • Redesigned settings page with improved UX
+        • Added dark mode with system preference detection
+        • Implemented comprehensive API rate limiting
+        ... (6 more)
+    
+    Hidden stories (not published):
+      • Internal auth refactor for Project Redwood
+      • Migrated user data to new schema
+      • Fixed bug in proprietary recommendation engine
+    
+    Run without --dry-run to publish
+    ```
+
+    Look good? Ship it.
+  </Step>
+
+  <Step title="Publish your stories">
+    Send your curated stories to the cloud:
+
+    ```bash
+    repr push --all
+    ```
+
+    Output:
+    ```text
+    Publishing to repr.dev...
+    
+    ↑ Uploading 12 stories
+    ↑ Updating profile
+    
+    ✓ Published successfully
+    ✓ Profile URL: https://repr.dev/@yourusername
+    ```
+
+    That's it. Your profile is live.
+  </Step>
+
+  <Step title="Share your link">
+    Get your public profile URL:
+
+    ```bash
+    repr profile link
+    ```
+
+    Output:
+    ```text
+    Your public profile: https://repr.dev/@yourusername
+    
+    Add it to:
+      • LinkedIn bio or summary
+      • Twitter/X profile  
+      • Email signature
+      • Resume or portfolio site
+    ```
+
+    Copy that URL and share it wherever you want.
+  </Step>
+</Steps>
+
+## What Your Profile Looks Like
+
+When someone visits your profile, they'll see:
+
+1. **Your bio and availability status**
+2. **Featured stories** (pinned at the top)
+3. **Recent stories** (chronological, newest first)
+4. **Technologies you work with** (auto-extracted from stories)
+5. **Activity timeline** (when you've been most active)
+
+Hidden stories don't appear, but they're still saved locally on your machine.
+
+## Keeping Your Profile Updated
+
+You don't need to manually push every time. Here's a good workflow:
+
+### Weekly Publishing Ritual
+
+```bash
+# Generate this week's stories
+repr generate --local
+
+# Review and curate
+repr stories --needs-review
+repr review  # Interactive mode
+
+# Feature anything exceptional
+repr story feature <id>
+
+# Push new stories
+repr push
+```
+
+Takes 5 minutes. Your profile stays current.
+
+### Automatic Sync (Advanced)
+
+Want your profile to auto-update? Set up a weekly sync:
+
+```bash
+# Pull any changes from cloud (if you edit on web)
+# Generate new stories
+# Push everything
+repr sync
+```
+
+You can add this to a cron job or run it manually every Friday.
+
+## Privacy Controls: What Gets Shared
+
+Let's be explicit about what publishing means:
+
+**What gets uploaded:**
+- ✅ Story titles and narratives (the ones you approved)
+- ✅ Technologies mentioned in stories
+- ✅ Dates when work was done
+- ✅ Your profile bio and settings
+
+**What doesn't get uploaded:**
+- ❌ Your source code (never)
+- ❌ Commit messages or diffs (never)
+- ❌ Repository names (unless mentioned in story narrative)
+- ❌ Hidden stories
+- ❌ Stories you haven't pushed
+
+### Audit What You've Shared
+
+Want to see exactly what data is on repr.dev?
+
+```bash
+repr privacy audit
+```
+
+Output:
+```text
+Network Activity Audit
+
+Last sync: 2026-01-05 14:32:00
+Account: you@example.com
+
+Published data:
+  • 12 stories (public)
+  • 3 stories (hidden, not shown on profile)
+  • 1 profile (bio, location, availability)
+
+Recent API calls:
+  • 2026-01-05 14:32 - POST /api/stories/push (12 stories)
+  • 2026-01-03 09:15 - GET /api/profile/sync
+  • 2026-01-01 16:45 - POST /api/stories/push (5 stories)
+
+Total data uploaded: 127 KB
+```
+
+### Hide a Story After Publishing
+
+Made a mistake? Realized a story has sensitive info?
+
+```bash
+repr story hide <id>
+repr push
+```
+
+The story is immediately hidden from your public profile. It stays on your machine but won't show on repr.dev.
+
+### Delete from Cloud Entirely
+
+Want to remove a story from cloud storage completely?
+
+```bash
+repr story delete <id> --remote
+```
+
+This deletes it from your local machine **and** from repr.dev.
+
+## Unpublish Everything
+
+Changed your mind about having a public profile?
+
+```bash
+# Hide all stories (keeps them local)
+repr privacy hide-all
+
+# Or delete your entire profile
+repr profile delete
+```
+
+Your local stories stay on your machine. Only the cloud copy is removed.
+
+## Who Should Publish?
+
+Honestly? **Most developers.**
+
+Here's why: When you're job hunting, hiring managers google your name. They look at your GitHub, LinkedIn, maybe your personal site (if you have one). But GitHub just shows code—it doesn't show **context**.
+
+A repr profile shows:
+- What problems you've solved (not just code)
+- How you think about your work (narratives, not just diffs)
+- What you've actually shipped (stories with impact)
+- Your technical breadth (technologies you've used)
+
+It's like a blog, but it writes itself from your git history. Way lower effort, way more authentic than trying to maintain a dev blog.
+
+## The Counter-Argument: Keep It Private
+
+That said, some people prefer to keep repr purely private. That's valid too.
+
+**Valid reasons to stay private:**
+- You work on proprietary systems where you can't share details
+- Your company has policies against public work discussions
+- You want repr for personal reflection, not external signaling
+- You're not comfortable with public profiles
+
+Repr works great as a private journaling tool. Generate stories, export to markdown, keep it all local. No judgment.
+
+## What's Next?
+
+Once your profile is live:
+
+- **Share it**: Add the link to your LinkedIn, Twitter, resume
+- **Keep it current**: Push new stories weekly or monthly
+- **Engage**: If someone reaches out via your profile, respond!
+- **Iterate**: Feature your best work, hide the rest
+
+Your repr profile is now a **living artifact** of what you build. Unlike a resume (static) or GitHub (raw code), it tells the story of your work.
+
+And unlike a blog, it updates itself. Just keep shipping code, run `repr generate`, and push. Your portfolio maintains itself.
+

@@ -1,0 +1,39 @@
+---
+title: repr init
+description: "Initialize repr and scan for repositories"
+icon: "play"
+---
+
+The `init` command is the entry point for using repr. It scans a directory for git repositories and sets up the local configuration.
+
+## Usage
+
+```bash
+repr init [PATH]
+```
+
+## Arguments
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `PATH` | Path | Directory to scan. Defaults to `~/code` if not provided. |
+
+## Examples
+
+Scan your home code directory:
+```bash
+repr init ~/code
+```
+
+Scan current directory:
+```bash
+repr init .
+```
+
+## Behavior
+
+1. **Scans** the target directory recursively for `.git` folders.
+2. **Filters** out archived or empty repositories.
+3. **Prompts** you to confirm which repositories to track.
+4. **Saves** the configuration to `~/.repr/config.json`.
+

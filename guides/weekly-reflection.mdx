@@ -1,0 +1,250 @@
+---
+title: Weekly Reflection
+description: "Review and summarize your week"
+icon: "calendar-week"
+---
+
+It's Friday at 4pm. Your manager Slacks you: "Hey, can you send me a quick summary of what you shipped this week?"
+
+You *know* you were productive. You merged like 15 PRs. But trying to remember what they were about? That's a different story.
+
+Enter the weekly reflection workflow. Spend 5 minutes every Friday reviewing your week, polishing your stories, and exporting a summary. Your future self (and your manager) will thank you.
+
+## The Friday Afternoon Ritual
+
+<Steps>
+  <Step title="See the week at a glance">
+    First, get the high-level view:
+
+    ```bash
+    repr week
+    ```
+
+    You'll see a clean summary of your commits grouped by repo:
+
+    ```text
+    📊 Last 7 days across 3 repositories (42 commits)
+
+    myproject (23 commits):
+      • OAuth2 integration with Google/GitHub
+      • Redis caching implementation
+      • Auth flow race condition fix
+      • API rate limiting
+      • Documentation updates
+    
+    frontend-app (15 commits):
+      • Settings page redesign
+      • Dark mode implementation
+      • Form validation improvements
+    
+    docs-site (4 commits):
+      • API reference updates
+      • Getting started guide
+    
+    Total: 42 commits, 87 files changed
+    ```
+
+    Not bad for a week.
+  </Step>
+
+  <Step title="Turn it into stories">
+    Now generate professional narratives from those commits:
+
+    ```bash
+    repr generate --local --batch-size 10
+    ```
+
+    The `--batch-size 10` tells repr to look at commits in groups of 10 (instead of the default 5). This helps it see patterns across multiple PRs.
+
+    ```text
+    Generating stories (local LLM: llama3.2)...
+    
+    Processing 42 commits in batches of 10...
+    
+    myproject → 4 stories
+      • Built OAuth2 integration with Google and GitHub providers
+      • Implemented Redis caching layer for session management
+      • Fixed race condition in authentication flow
+      • Added comprehensive API rate limiting
+    
+    frontend-app → 2 stories  
+      • Redesigned settings page with improved UX
+      • Implemented dark mode with system preference detection
+    
+    docs-site → 1 story
+      • Updated API documentation and onboarding guides
+    
+    ✓ Generated 7 stories
+    ```
+  </Step>
+
+  <Step title="Polish and curate">
+    The LLM did good work, but you can make it even better. Add context that isn't obvious from the code.
+
+    ```bash
+    # See what got generated
+    repr stories
+    ```
+
+    Pick a story to improve:
+
+    ```bash
+    repr story edit 01ARYZ6S41TSV4RRFFQ69G5FAV
+    ```
+
+    This opens the story in your `$EDITOR` (vim, nano, VS Code—whatever you have configured). Add details like:
+    - **Why** you built this (the business context)
+    - **Impact** on users or metrics  
+    - **Challenges** you overcame that don't show up in commit messages
+
+    Example of what you might add:
+    ```markdown
+    Built OAuth2 integration with Google and GitHub providers
+    
+    Implemented OAuth2 authentication supporting Google and GitHub 
+    sign-in, replacing our legacy username/password system. Used PKCE 
+    flow for enhanced security and proper token refresh handling.
+    
+    **Impact:** Reduced signup friction by 40%, increased conversions
+    from 12% to 17%. Users can now sign in with existing accounts 
+    instead of creating yet another password.
+    
+    **Technical challenges:** Handled edge cases around expired tokens
+    and implemented graceful fallback when providers are unavailable.
+    ```
+
+    Save and close. That's now part of your permanent story.
+  </Step>
+
+  <Step title="Feature your best work">
+    Some stories are just better than others. Mark them so they appear at the top of your profile:
+
+    ```bash
+    repr story feature 01ARYZ6S41TSV4RRFFQ69G5FAV
+    ```
+
+    Featured stories show up first when you export or publish your profile.
+  </Step>
+
+  <Step title="Export and share">
+    Now for the payoff. Generate a beautiful markdown summary:
+
+    ```bash
+    repr profile export --format md --since "1 week ago" > weekly-summary.md
+    ```
+
+    Open `weekly-summary.md` and you've got a polished update ready to share with your team, your manager, or just keep for your own records.
+
+    Want JSON instead (for feeding into other tools)?
+
+    ```bash
+    repr profile export --format json --since "1 week ago" > week.json
+    ```
+  </Step>
+</Steps>
+
+## Pro Tips for Better Stories
+
+### Use the Right Template
+
+Different audiences need different styles. Repr has templates for that:
+
+| Template | Best For | Output Style | When to Use |
+|----------|----------|--------------|-------------|
+| `resume` | Portfolios, resumes | Action verbs, quantified impact | Job searching, annual reviews |
+| `changelog` | Release notes, tech teams | Added/Changed/Fixed categories | Sprint reviews, release notes |
+| `narrative` | Blog posts, case studies | Storytelling, problem-solving | Blog content, detailed writeups |
+| `interview` | Job interviews | STAR format (Situation/Task/Action/Result) | Interview prep |
+
+**Examples:**
+
+```bash
+# For your manager (impact-focused)
+repr generate --template resume
+
+# For release notes (technical)
+repr generate --template changelog
+
+# For a blog post about what you learned
+repr generate --template narrative
+
+# For interview prep
+repr generate --template interview
+```
+
+### The Changelog Style
+
+Perfect for sprint demos or release notes:
+
+```bash
+repr generate --template changelog
+```
+
+Output:
+```markdown
+## Added
+- OAuth2 authentication with Google/GitHub providers
+- Dark mode support with system preference detection
+- Comprehensive API rate limiting
+
+## Fixed  
+- Race condition in authentication flow causing intermittent failures
+- Form validation errors not showing on mobile
+
+## Changed
+- Settings page redesigned with improved navigation
+- Migrated from username/password to OAuth2
+```
+
+### The STAR Interview Style
+
+Building a story bank for your next job search:
+
+```bash
+repr generate --template interview
+```
+
+Output:
+```markdown
+**Situation:** The authentication system was experiencing race 
+conditions under high load, causing 5-10% of login attempts to fail.
+
+**Task:** I needed to identify the root cause and implement a fix 
+without disrupting the existing user session management.
+
+**Action:** I traced the issue to concurrent Redis operations during 
+session creation. Implemented distributed locking using Redis SETNX 
+with proper timeout handling and retry logic.
+
+**Result:** Reduced authentication failures from 8% to <0.1%. 
+Improved average login latency by 20ms. No user sessions lost during 
+the migration.
+```
+
+Copy/paste that directly into your interview notes.
+
+## Make It a Habit
+
+The magic of weekly reflection isn't in the tool—it's in the **consistency**. Here's how to make it stick:
+
+**Option 1: Calendar Block**  
+Put "repr weekly review" on your calendar every Friday at 4pm. Five minutes, every week.
+
+**Option 2: Git Hook (Meta)**  
+Some people hook it up to their Friday afternoon commits. When you push your last PR of the week, repr reminds you to review.
+
+**Option 3: Manager 1-on-1s**  
+If you have weekly 1-on-1s, run your reflection right before. Export the summary and send it as pre-read. Your manager will love you.
+
+## What This Gets You
+
+After a month of weekly reflections, you'll have:
+
+- **20+ polished stories** about real work you shipped
+- **A living portfolio** that updates itself
+- **Easy performance reviews** - Just export the last 3 months
+- **Interview prep on demand** - Switch to `--template interview` and you're ready
+- **Proof of impact** for raises, promotions, or job searches
+
+The compound effect is real. Five minutes a week becomes an incredible career asset over time.
+

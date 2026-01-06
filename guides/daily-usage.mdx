@@ -1,0 +1,186 @@
+---
+title: Daily Developer Flow
+description: "Automate your tracking with git hooks"
+icon: "calendar-check"
+---
+
+Here's the thing about tracking your work: if it takes more than 5 seconds, you won't do it. You're busy shipping code, not maintaining a work journal.
+
+Repr solves this by making tracking **invisible**. Once you set it up, it just works in the background. Here are three ways to fit repr into your daily flow, from fully automatic to totally manual.
+
+## Option 1: Set It and Forget It (Recommended)
+
+Install git hooks once. From then on, every commit you make gets silently queued for story generation—no interruptions, no network calls, just quiet tracking.
+
+<Steps>
+  <Step title="Install hooks everywhere">
+    One command to install hooks in all your tracked repos:
+
+    ```bash
+    repr hooks install --all
+    ```
+
+    That's it. Now when you run `git commit`, repr adds that commit to a local queue in the background. You won't even notice it happening.
+
+    **What gets sent where?** Nothing. The hook just writes to `~/.repr/queue` on your machine. No network activity.
+  </Step>
+
+  <Step title="Generate stories when you're ready">
+    At the end of your day (or week, or whenever), turn the queue into stories:
+
+    ```bash
+    repr generate --local
+    ```
+
+    Repr reads the queued commits, groups related work, and generates professional summaries using your local LLM.
+
+    ```text
+    Processing 23 queued commits...
+    
+    myproject (12 commits) → 3 stories
+      • Built OAuth2 integration with Google and GitHub providers
+      • Implemented Redis caching for session management  
+      • Fixed race condition in authentication flow
+    
+    frontend-app (11 commits) → 2 stories
+      • Redesigned settings page with improved UX flows
+      • Added dark mode toggle with system preference detection
+    
+    ✓ Generated 5 stories
+    ✓ Cleared queue
+    ```
+  </Step>
+
+  <Step title="Review and approve">
+    New stories are marked as "needs review" by default. Check them out:
+
+    ```bash
+    repr stories --needs-review
+    ```
+
+    Or use the interactive review flow:
+
+    ```bash
+    repr review
+    ```
+
+    You'll be walked through each story with options:
+
+    ```text
+    Story 1/5: Built OAuth2 integration with Google/GitHub
+
+    OAuth2 integration supporting Google and GitHub providers with 
+    PKCE flow for enhanced security. Implemented token refresh logic
+    and proper error handling for expired credentials.
+    
+    Technologies: Python, OAuth2, Redis
+    
+    [a] Approve  [e] Edit  [r] Regenerate  [d] Delete  [s] Skip  [q] Quit
+    ```
+
+    Press `a` to approve, `e` to edit in your `$EDITOR`, or `r` to regenerate with different context.
+  </Step>
+</Steps>
+
+<Tip>
+  **Pro tip:** Run `repr generate` on Friday afternoons. Review your week's work in 2 minutes, then export it as your weekly update for your manager or team.
+</Tip>
+
+## Option 2: Quick Morning Standup
+
+Don't want hooks? No problem. Use repr as your standup prep tool.
+
+```bash
+repr standup
+```
+
+This gives you a quick summary of the last 3 days—perfect for answering "what did you work on yesterday?"
+
+```text
+📊 Work since last 3 days (17 commits)
+
+myproject (12 commits):
+  • Add user authentication flow
+  • Fix session timeout bug  
+  • Implement rate limiting middleware
+  • Update API documentation
+  
+frontend-app (5 commits):
+  • Add loading states to forms
+  • Fix responsive layout on mobile
+
+Total: 17 commits across 2 repos
+```
+
+**This is just a preview**—it doesn't save anything. But if you like what you see:
+
+```bash
+repr standup --save
+```
+
+Now it's a permanent story in your `~/.repr/stories` folder.
+
+## Option 3: End-of-Day Capture
+
+Maybe you don't want automatic hooks, but you do want to capture your work at the end of each day. That's the sweet spot for a lot of people.
+
+```bash
+# See what you did today
+repr since "this morning"
+```
+
+Output:
+```text
+Today's work (8 commits):
+
+myproject:
+  • Implement password reset flow
+  • Add email verification
+  • Fix CORS headers for production
+  
+frontend-app:
+  • Update user profile UI
+  • Add avatar upload
+```
+
+Like what you see? Save it:
+
+```bash
+repr since "this morning" --save
+```
+
+Or get even more specific:
+
+```bash
+# Work since Monday
+repr since "monday" --save
+
+# Just this week
+repr since "1 week ago" --save
+
+# Specific date range
+repr since "2026-01-01" --save
+```
+
+## Which Workflow Should You Use?
+
+Here's how to think about it:
+
+| Workflow | Best For | Time Investment |
+|----------|----------|----------------|
+| **Hooks (automatic)** | People who want zero friction | 1 min setup, then nothing |
+| **Standup** | People who like morning rituals | 30 seconds daily |
+| **End-of-day** | People who batch work at day's end | 2 minutes daily |
+
+The honest truth? Most people start with standup, realize they want it automated, and switch to hooks. But all three work great—pick what fits your style.
+
+## What Happens Next?
+
+Once you've got stories being generated regularly, you can:
+
+- **Weekly review**: Use [Weekly Reflection](/guides/weekly-reflection) to curate and polish your best work
+- **Interview prep**: Generate [STAR-format stories](/guides/interview-prep) for behavioral interviews
+- **Publishing**: (Optional) [Share your profile](/guides/publishing) on repr.dev
+
+The key is: **start capturing now**. Future you will thank present you when it's time to update your resume, prep for a review, or answer "what have you been working on?"
+

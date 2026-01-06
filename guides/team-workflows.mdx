@@ -1,0 +1,407 @@
+---
+title: Team Workflows
+description: "Use repr for sprint reviews, retros, and team updates"
+icon: "users"
+---
+
+Repr isn't just for individual developers. It's surprisingly powerful for teams.
+
+Whether you're a tech lead reviewing contributions, an engineering manager preparing for 1-on-1s, or a product team doing sprint retros—repr can help you surface what actually got done.
+
+Here are some team workflows that work really well.
+
+## Sprint Reviews & Demos
+
+You're about to do a sprint demo. Your PM asks: "What did the team ship this sprint?"
+
+Instead of scrambling through Jira tickets or asking everyone to remember their work, use repr to generate a summary.
+
+### The Workflow
+
+```bash
+# Track the team's main repos
+repr repos add ~/code/team-api
+repr repos add ~/code/team-frontend  
+repr repos add ~/code/shared-lib
+
+# Generate stories for the last 2 weeks (one sprint)
+repr since "2 weeks ago" --save
+
+# Or use the changelog template for sprint summaries
+repr generate --template changelog --since "2 weeks ago"
+```
+
+Output:
+```text
+Generating changelog (last 2 weeks)...
+
+## Added
+- OAuth2 authentication with SSO support
+- Real-time notification system via WebSockets
+- User preference management dashboard
+- Comprehensive API rate limiting
+- Dark mode throughout application
+
+## Fixed  
+- Race condition in session handling (affecting 8% of users)
+- Memory leak in WebSocket connections
+- Form validation errors on mobile Safari
+- Slow query performance in analytics dashboard
+
+## Changed
+- Migrated from REST polling to WebSocket subscriptions
+- Redesigned settings page with improved UX
+- Updated authentication flow for SSO compliance
+
+Total: 87 commits across 3 repositories
+23 contributors
+```
+
+Copy/paste that into your sprint demo slides. Done.
+
+### Export for Stakeholders
+
+Want a polished document for stakeholders?
+
+```bash
+repr profile export --format md --since "2 weeks ago" > sprint-14-summary.md
+```
+
+Send that to your PM, your manager, or your stakeholders. They get a readable summary of what the team actually built.
+
+## Engineering Manager 1-on-1s
+
+You're an EM with 6 direct reports. You have 1-on-1s every week. You want to come prepared with specific examples of each person's work.
+
+Repr makes this easy.
+
+### Per-Developer Summaries
+
+```bash
+# Track your team's repos
+repr repos add ~/code/team-project
+
+# Generate stories (this captures everyone's commits)
+repr generate --local
+
+# Export to JSON for analysis
+repr profile export --format json > team-work.json
+```
+
+Now use `jq` or write a small script to group stories by author:
+
+```bash
+# Show work by specific developer
+repr commits --author "alice@company.com" --since "1 week ago"
+```
+
+Output:
+```text
+Alice's work (last 7 days):
+
+team-api (8 commits):
+  • Implement user preference API endpoints
+  • Add caching layer for preference lookups
+  • Fix N+1 query in user dashboard
+  • Add comprehensive API tests
+
+team-frontend (5 commits):
+  • Build preference management UI
+  • Integrate with new API endpoints
+  • Add loading states and error handling
+
+Total: 13 commits, 23 files changed
+```
+
+Bring that to your 1-on-1. You have specifics to discuss instead of vague "how's it going?"
+
+### Preparing for Performance Reviews
+
+It's Q4. Time for annual reviews. You need to write summaries for each team member.
+
+```bash
+# Generate 6 months of stories for your repos
+repr generate --since "6 months ago" --template resume
+
+# Export to markdown
+repr profile export --format md --since "6 months ago" > Q2-Q4-work.md
+```
+
+You now have a professional summary of every significant piece of work the team shipped. Break it down by author and you've got the bulk of your review write-ups.
+
+## Sprint Retrospectives
+
+Your team does retros every 2 weeks. You want to reflect on what you built and what went well/poorly.
+
+### Generate Context for the Retro
+
+```bash
+# Changelog-style summary for the sprint
+repr generate --template changelog --since "2 weeks ago"
+
+# Or narrative style for more context
+repr generate --template narrative --since "2 weeks ago"
+```
+
+Narrative output:
+```markdown
+Over the past two weeks, the team focused primarily on authentication 
+and user preferences. We started by implementing OAuth2 with SSO 
+support, which required coordinating with the infrastructure team for 
+certificate management.
+
+The biggest technical challenge was handling race conditions in our 
+session management. This manifested as intermittent login failures 
+affecting about 8% of users. After extensive debugging with distributed 
+tracing, we identified concurrent Redis operations as the culprit and 
+implemented distributed locking with proper timeout handling.
+
+We also shipped a complete user preference management system, including 
+backend APIs with caching and a polished frontend UI. The team worked 
+in parallel—backend and frontend moving together instead of sequential 
+handoffs. This significantly reduced cycle time.
+
+Towards the end of the sprint, we tackled several performance issues, 
+most notably a slow analytics query that was timing out during peak 
+hours. Query optimization reduced response time from 8 seconds to under 
+200ms...
+```
+
+Read that at the start of your retro. Everyone remembers what actually happened instead of vague feelings.
+
+### Identify Patterns
+
+Looking at multiple sprints helps you spot patterns:
+
+```bash
+# Last 3 sprints
+repr generate --template changelog --since "6 weeks ago"
+```
+
+Look for:
+- **Types of work**: Are you always fixing bugs? Shipping features? Dealing with tech debt?
+- **Blockers**: Do the stories mention waiting for dependencies?
+- **Wins**: What shipped smoothly?
+
+Use this as input for your retro discussions.
+
+## Tech Lead / Architect Review
+
+You're a tech lead or architect. You want to stay aware of what your team is building without micromanaging or reading every PR.
+
+### Weekly Tech Lead Standup
+
+```bash
+# Every Monday morning, review last week's work
+repr week --template changelog
+```
+
+Output shows:
+- New features added
+- Bugs fixed  
+- Architecture changes
+- Dependencies introduced
+
+Takes 5 minutes to review. You stay in the loop without asking everyone "what are you working on?"
+
+### Spotting Technical Drift
+
+Generate stories monthly and look for patterns:
+
+```bash
+repr generate --since "1 month ago" --template resume
+repr profile export --format json > monthly-work.json
+```
+
+Look for:
+- **Technology creep**: Are new libraries/frameworks being added without discussion?
+- **Code duplication**: Are multiple people solving the same problem differently?
+- **Architecture violations**: Are stories mentioning shortcuts or workarounds?
+
+This gives you data for architectural conversations instead of gut feelings.
+
+## Product Manager Updates
+
+You're a PM. Your stakeholders ask: "What's the engineering team working on?"
+
+### Weekly Stakeholder Update
+
+```bash
+# Generate user-facing changes only
+repr since "1 week ago" --save
+
+# Export as markdown
+repr profile export --format md --since "1 week ago" > weekly-update.md
+```
+
+Edit the markdown to:
+- Remove internal technical details
+- Add user impact framing
+- Highlight features stakeholders care about
+
+Example transformation:
+
+Before (technical):
+```markdown
+Implemented Redis caching layer for session management with distributed 
+locking and SETNX-based conflict resolution.
+```
+
+After (stakeholder-friendly):
+```markdown
+Improved login reliability from 92% to 99.9%. Users will experience 
+fewer "please try again" errors during peak hours.
+```
+
+Repr gives you the raw material. You add the product context.
+
+## Changelog Generation for Releases
+
+Your team ships weekly. You need release notes.
+
+```bash
+# Generate changelog for last week
+repr generate --template changelog --since "1 week ago"
+
+# Export to markdown
+repr profile export --format md --since "1 week ago" > CHANGELOG-v2.14.md
+```
+
+You get a structured changelog:
+- **Added**: New features
+- **Fixed**: Bug fixes
+- **Changed**: Breaking changes or improvements
+
+Clean it up, add ticket numbers if needed, and publish.
+
+## Team Collaboration Best Practices
+
+### 1. Shared Repo Tracking
+
+Everyone on the team should track the same repos:
+
+```bash
+# Share this command with your team
+repr repos add ~/code/team-api
+repr repos add ~/code/team-frontend
+```
+
+Now everyone can generate stories from the same repositories.
+
+### 2. Consistent Templates
+
+Agree on templates for different use cases:
+
+- **Sprint demos**: `--template changelog`
+- **Stakeholder updates**: `--template resume`
+- **Technical deep-dives**: `--template narrative`
+- **Performance reviews**: `--template resume`
+
+This creates consistency across the team.
+
+### 3. Privacy Boundaries
+
+Make sure the team knows:
+- Stories are **local by default**
+- Publishing is **opt-in**
+- Each person controls their own profile
+
+Team leads can use repr for internal summaries without requiring everyone to publish publicly.
+
+### 4. Review Before Sharing
+
+Always preview before sending to stakeholders:
+
+```bash
+repr push --dry-run
+```
+
+Make sure nothing sensitive is included (internal project names, security details, proprietary algorithms).
+
+## Tools and Scripts for Teams
+
+### Export All Team Work (Bash Script)
+
+```bash
+#!/bin/bash
+# Save as: export-team-work.sh
+
+SINCE=${1:-"1 week ago"}
+OUTPUT="team-work-$(date +%Y-%m-%d).md"
+
+repr generate --template changelog --since "$SINCE"
+repr profile export --format md --since "$SINCE" > "$OUTPUT"
+
+echo "Team summary exported to: $OUTPUT"
+```
+
+Usage:
+```bash
+./export-team-work.sh "2 weeks ago"
+```
+
+### Per-Developer Reports (Python Script)
+
+```python
+#!/usr/bin/env python3
+# Save as: developer-reports.py
+
+import json
+import subprocess
+from collections import defaultdict
+
+# Get all stories as JSON
+result = subprocess.run(
+    ["repr", "profile", "export", "--format", "json"],
+    capture_output=True,
+    text=True
+)
+
+stories = json.loads(result.stdout)
+
+# Group by author (extracted from story metadata)
+by_author = defaultdict(list)
+for story in stories:
+    author = story.get("author", "Unknown")
+    by_author[author].append(story)
+
+# Print summary per developer
+for author, author_stories in by_author.items():
+    print(f"\n## {author}")
+    print(f"Total stories: {len(author_stories)}\n")
+    for story in author_stories[:5]:  # Top 5
+        print(f"- {story['title']}")
+```
+
+Usage:
+```bash
+python developer-reports.py
+```
+
+## When NOT to Use Repr for Teams
+
+**Not ideal for:**
+- Real-time project tracking (use Jira/Linear for that)
+- Detailed task management (repr works at the story level, not task level)
+- Sprint planning (repr reflects what happened, not what's planned)
+- Time tracking (repr doesn't track hours)
+
+**Ideal for:**
+- Post-sprint summaries
+- Performance reviews
+- Stakeholder updates
+- Retro preparation
+- Release notes
+
+Repr is a **reflection tool**, not a project management tool.
+
+## What's Next?
+
+Once your team is using repr:
+
+- **Standardize exports**: Create templates for weekly updates, sprint summaries
+- **Automate**: Set up CI/CD to generate changelogs on release
+- **Share workflows**: Document your team's repr workflows in your internal wiki
+
+Repr scales from individual developers to entire engineering organizations. Start small, expand as you find value.
+
